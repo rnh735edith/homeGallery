@@ -10,7 +10,7 @@ class Album(Base):
     description = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    is_auto = Column(Boolean, default=False, index=True)
+    is_auto = Column(Boolean, default=False, nullable=False, index=True)
 
 
 class AlbumPhoto(Base):
