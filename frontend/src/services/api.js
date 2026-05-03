@@ -172,6 +172,10 @@ export const agents = {
   resetAgent: (name) => api.post(`/agents/${name}/reset`),
 };
 
+export const metadata = {
+  get: (photoId) => api.get(`/photos/${photoId}/metadata`),
+};
+
 const apiClient = api;
 apiClient.auth = auth;
 apiClient.photos = photos;
@@ -182,4 +186,5 @@ apiClient.settings = settings;
 apiClient.setup = setup;
 apiClient.management = management;
 apiClient.agents = agents;
+apiClient.metadata = metadata;
 export default apiClient;
