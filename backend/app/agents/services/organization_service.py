@@ -1,7 +1,9 @@
 import os
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Any
+
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +18,9 @@ class OrganizationService:
 
     def __init__(self, settings):
         self.settings = settings
-        self._phash_cache = {}
+        self._phash_cache: dict[str, int] = {}
 
-    def create_date_albums(self, db) -> dict:
+    def create_date_albums(self, db: Session) -> dict[str, int]:
         """Create daily and monthly albums based on photo taken_at dates.
 
         Returns stats: { "daily_created": N, "monthly_created": M, "photos_organized": K }
@@ -92,7 +94,7 @@ class OrganizationService:
             "photos_organized": len(photos_organized),
         }
 
-    def _add_photos_to_album(self, db, album, photos):
+    def _add_photos_to_album(self, db: Session, album, photos: list) -> None:
         """Add photos to album via AlbumPhoto junction (skip duplicates)."""
         from app.models.album import AlbumPhoto
 
