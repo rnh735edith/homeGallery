@@ -51,6 +51,9 @@ def get_duplicates(
             .all()
         )
 
+        if not dup_photos:
+            continue
+
         groups.append({
             "original": PhotoResponse.model_validate(original),
             "duplicates": [PhotoResponse.model_validate(p) for p in dup_photos],
