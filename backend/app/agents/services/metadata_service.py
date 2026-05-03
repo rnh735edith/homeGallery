@@ -56,8 +56,6 @@ class MetadataService:
                     except Exception:
                         pass
 
-                if "DateTimeOriginal" in exif_data:
-                    exif_data["DateTimeOriginal"] = exif_data["DateTimeOriginal"]
                 if "Model" in exif_data:
                     exif_data["Camera"] = exif_data["Model"]
                 if "Make" in exif_data:
@@ -206,7 +204,8 @@ class MetadataService:
 
             if "Flash" in exif_data:
                 flash_val = str(exif_data["Flash"]).lower()
-                if "fired" in flash_val:
+                # Numeric: 1 = fired, 0 = not fired; String: contains "fired"
+                if "fired" in flash_val or flash_val == "1" or flash_val == "true":
                     clues.append("indoor")
                 else:
                     clues.append("outdoor")
@@ -271,9 +270,14 @@ class MetadataService:
 
         return sorted(list(tags))
 
-    def process_photo(self, file_path: str, exif_data: dict) -> dict:
-        """Full metadata processing pipeline for a photo."""
-        exif = exif_data or self.extract_exif(file_path)
+    def process_photo(self, file_path: str, exif_data: dict = None) -> dict:
+        """Full metadata processing pipeline for a photo.
+
+        Note: Each method opens the image independently for Phase 2 compatibility.
+        In future optimization (Phase 3+), consider passing pre-loaded image data
+        to avoid repeated file I/O (currently opens image 6+ times per photo).
+        """
+        exif = exif_data if exif_data is not None else self.extract_exif(file_path)
         objects = self.detect_objects(file_path)
         colors = self.analyze_colors(file_path)
         scene_type = self.classify_scene(file_path, exif)

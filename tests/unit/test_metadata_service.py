@@ -53,6 +53,9 @@ class TestDetectObjects:
         result = service.detect_objects(sample_image_path)
         for obj in result:
             assert isinstance(obj, str)
+        # Verify fallback returns expected features for a known solid-color image
+        # 100x100 image should be classified as "square"
+        assert "square" in result
 
 
 class TestAnalyzeColors:
@@ -73,6 +76,9 @@ class TestAnalyzeColors:
         for color in result:
             assert color.startswith("#")
             assert len(color) == 7
+            # Verify it's valid hex (6 hex digits after #)
+            hex_part = color[1:]
+            int(hex_part, 16)  # Will raise ValueError if not valid hex
 
     def test_analyze_colors_on_missing_file(self, service):
         result = service.analyze_colors("/nonexistent/file.jpg")
@@ -88,11 +94,13 @@ class TestClassifyScene:
         exif = {"Flash": "Flash fired"}
         result = service.classify_scene(sample_image_path, exif)
         assert isinstance(result, str)
+        assert "indoor" in result
 
     def test_classify_scene_with_night_time(self, service, sample_image_path):
         exif = {"DateTimeOriginal": "2026:01:15 23:30:00"}
         result = service.classify_scene(sample_image_path, exif)
         assert isinstance(result, str)
+        assert "night" in result
 
 
 class TestGenerateTags:
