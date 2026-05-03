@@ -2,6 +2,39 @@
 
 > Read at the beginning of each session. Updated at the end.
 
+## 2026-05-03 - Phase 3: Auto-Organization Agent Design
+
+### Current Status
+- **Design complete**: Auto-albums by date + Duplicate detection (pHash)
+- **Spec saved**: `docs/superpowers/specs/2026-05-03-auto-organization-agent-design.md`
+- **Key decisions**: `is_auto` field on Album model, mark-duplicates-only (no auto-delete), "YYYY-MM-DD" + "Month YYYY" naming
+
+### Design Decisions
+- **Approach A**: Extend Album model + OrganizationService + OrganizationAgent (follows Phase 2 pattern)
+- **Scope**: Auto-albums by date + duplicate detection. GPS clustering and best-shot deferred.
+- **is_auto field**: Boolean on Album model, default False. Auto-albums cannot be renamed/deleted via UI.
+- **Duplicate detection**: imagehash library, pHash with configurable hamming distance threshold. Mark only, no deletion.
+- **Agent disabled by default**: User must opt-in via Settings > Agents tab.
+
+### Architecture
+- OrganizationService: `create_date_albums()` + `detect_duplicates()` + pHash helpers
+- OrganizationAgent: Extends AgentBase, runs service methods on 15-min interval
+- API: `GET /api/photos/duplicates` returns duplicate groups
+- Frontend: AlbumsPage auto-badge, DuplicatesPage new route, AlbumCard component
+
+### Testing Plan
+- Unit: OrganizationService (date grouping, pHash, duplicate grouping), OrganizationAgent, Album model
+- Integration: Agent run cycle creates albums and marks duplicates
+- E2E: Auto-albums in Albums page, duplicates view, agent card in Settings
+
+### Key Learnings
+- `imagehash` is a new dependency — needs graceful fallback if not installed
+- Agent operates on full dataset (not per-photo), so `is_photo_processed` always returns False
+- Idempotent operations prevent duplicate album creation on re-runs
+- Album model needs DB migration (SQLAlchemy auto-creates columns on init_db)
+
+---
+
 ## 2026-05-03 - Tasks 4 & 5: Metadata API & Search Filters
 
 ### Current Status
@@ -352,3 +385,33 @@ npx playwright install chromium        # Install browser
 - `tests/e2e/setup_test_env.py` - Test DB seeder
 - `run.py` - One-command launcher (created earlier)
 - `README.md` - Updated documentation
+
+---
+
+## 2026-05-04 - Task 6: Block Edit/Delete for Auto-Albums
+
+### Current Status
+- **Task 6 COMPLETE**: Block edit/delete for auto-albums in albums API
+- **2/2 unit tests passing** (TestAlbumApiAutoAlbumProtection)
+
+### Implementation Details
+
+#### Files Modified:
+- `backend/app/api/albums.py` - Added `is_auto` checks to `update_album()` and `delete_album()`
+- `tests/unit/test_album_model.py` - Added `TestAlbumApiAutoAlbumProtection` class with 2 tests
+
+#### Key Implementation:
+- In `update_album()`: After checking if album exists, added check `if album.is_auto:` to raise 403
+- In `delete_album()`: After checking if album exists, added check `if album.is_auto:` to raise 403
+- Both return 403 FORBIDDEN with appropriate error messages
+
+#### Testing Approach:
+- Called endpoint functions directly with mocked parameters (following pattern from LESSONS.md)
+- Avoided TestClient due to SQLite threading issues with in-memory databases
+- Used `HTTPException` catching to verify 403 status code
+
+### Key Learnings
+- **TestClient + SQLite in-memory**: SQLite objects created in one thread cannot be used in another thread. TestClient runs requests in a separate thread, causing `ProgrammingError`.
+- **Solution**: Call endpoint functions directly with mocked `db` session and `current_user` parameters
+- **TDD workflow**: Write failing test first (RED), implement minimal code (GREEN), verify tests pass
+- **FastAPI status codes**: Use `status.HTTP_403_FORBIDDEN` (not `FORBIDDEN` with typo)

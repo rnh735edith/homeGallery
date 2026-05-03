@@ -47,3 +47,69 @@ class TestAlbumSchemaIsAuto:
         )
         assert schema.is_auto is True
         assert schema.model_dump()["is_auto"] is True
+
+
+class TestAlbumApiAutoAlbumProtection:
+    def test_cannot_update_auto_album_name(self, test_db):
+        """Auto-albums cannot be renamed."""
+        from app.models.album import Album
+        from app.api.albums import update_album
+        from app.schemas.album import AlbumUpdate
+        from unittest.mock import MagicMock
+
+        # Create auto-album
+        auto_album = Album(name="2026-05-03", is_auto=True)
+        test_db.add(auto_album)
+        test_db.commit()
+        test_db.refresh(auto_album)
+
+        # Mock user (non-admin)
+        mock_user = MagicMock(username="testuser", is_admin=False)
+
+        # Try to update the album name
+        from fastapi import HTTPException
+        try:
+            result = update_album(
+                album_id=auto_album.id,
+                album_data=AlbumUpdate(name="Hacked Album"),
+                db=test_db,
+                current_user=mock_user,
+            )
+            # Should not reach here
+            assert False, "Expected HTTPException"
+        except HTTPException as e:
+            assert e.status_code == 403
+            assert "Auto-generated albums cannot be modified" in e.detail
+
+    def test_cannot_delete_auto_album(self, test_db):
+        """Auto-albums cannot be deleted."""
+        from app.models.album import Album
+        from app.api.albums import delete_album
+        from unittest.mock import MagicMock
+
+        # Create auto-album
+        auto_album = Album(name="May 2026", is_auto=True)
+        test_db.add(auto_album)
+        test_db.commit()
+        test_db.refresh(auto_album)
+
+        # Mock user (non-admin)
+        mock_user = MagicMock(username="testuser", is_admin=False)
+
+        # Try to delete the album
+        from fastapi import HTTPException
+        try:
+            result = delete_album(
+                album_id=auto_album.id,
+                db=test_db,
+                current_user=mock_user,
+            )
+            # Should not reach here
+            assert False, "Expected HTTPException"
+        except HTTPException as e:
+            assert e.status_code == 403
+            assert "Auto-generated albums cannot be deleted" in e.detail
+
+        # Verify album still exists
+        still_exists = test_db.query(Album).filter(Album.id == auto_album.id).first()
+        assert still_exists is not None
