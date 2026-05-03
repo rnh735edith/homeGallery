@@ -1,0 +1,29 @@
+from fastapi import APIRouter
+
+from app.api.auth import router as auth_router
+from app.api.photos import router as photos_router
+from app.api.albums import router as albums_router
+from app.api.faces import router as faces_router
+from app.api.search import router as search_router
+from app.api.setup import router as setup_router
+from app.api.metrics import router as metrics_router
+from app.api.settings_api import router as settings_router
+from app.api.queue import router as queue_router
+from app.api.management import router as management_router
+from app.api.agents import router as agents_router
+
+api_router = APIRouter(prefix="/api")
+
+api_router.include_router(auth_router)
+api_router.include_router(photos_router)
+api_router.include_router(albums_router)
+api_router.include_router(faces_router)
+api_router.include_router(search_router)
+api_router.include_router(setup_router)
+api_router.include_router(metrics_router)
+api_router.include_router(settings_router)
+api_router.include_router(queue_router)
+api_router.include_router(management_router)
+api_router.include_router(agents_router)
+
+__all__ = ["api_router"]
