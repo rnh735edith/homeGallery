@@ -39,12 +39,22 @@ class PhotoResponse(BaseModel):
     @field_validator("thumbnail_paths", mode="before")
     @classmethod
     def ensure_list(cls, v):
-        return v if v is not None else []
+        if v is None:
+            return []
+        if isinstance(v, dict):
+            # Convert dict of {size: path} to list of paths (legacy format)
+            return list(v.values())
+        return v
 
     @field_validator("exif_data", mode="before")
     @classmethod
     def ensure_dict(cls, v):
-        return v if v is not None else {}
+        if v is None:
+            return {}
+        if isinstance(v, list):
+            # Convert list to dict (legacy format)
+            return {}
+        return v
 
 
 class PhotoListResponse(BaseModel):
