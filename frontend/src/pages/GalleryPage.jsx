@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGalleryStore } from "../store/galleryStore";
 import MetadataBadge from "../components/Gallery/MetadataBadge";
+import PhotoMetadataPanel from "../components/Gallery/PhotoMetadataPanel";
 
 export default function GalleryPage() {
   const {
@@ -23,6 +24,9 @@ export default function GalleryPage() {
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [bulkMoveAlbum, setBulkMoveAlbum] = useState("");
   const [albums, setAlbums] = useState([]);
+  const [filterTag, setFilterTag] = useState("");
+  const [filterColor, setFilterColor] = useState("");
+  const [showMetadataPanel, setShowMetadataPanel] = useState(null);
   const fileInputRef = useRef(null);
   const gridRef = useRef(null);
 
@@ -30,9 +34,11 @@ export default function GalleryPage() {
     fetchPhotos({
       favorite: showFavorites || undefined,
       q: searchQuery || undefined,
+      tag: filterTag || undefined,
+      color: filterColor || undefined,
     });
     loadAlbums();
-  }, [showFavorites, searchQuery]);
+  }, [showFavorites, searchQuery, filterTag, filterColor]);
 
   useEffect(() => {
     const closeContextMenu = () => setContextMenu(null);
@@ -89,6 +95,8 @@ export default function GalleryPage() {
     fetchPhotos({
       favorite: showFavorites || undefined,
       q: searchQuery || undefined,
+      tag: filterTag || undefined,
+      color: filterColor || undefined,
     });
   };
 
@@ -108,6 +116,8 @@ export default function GalleryPage() {
     fetchPhotos({
       favorite: showFavorites || undefined,
       q: searchQuery || undefined,
+      tag: filterTag || undefined,
+      color: filterColor || undefined,
     });
   };
 
@@ -144,6 +154,8 @@ export default function GalleryPage() {
           fetchPhotos({
             favorite: showFavorites || undefined,
             q: searchQuery || undefined,
+            tag: filterTag || undefined,
+            color: filterColor || undefined,
           });
         }
         break;
@@ -178,6 +190,31 @@ export default function GalleryPage() {
           >
             {showFavorites ? "\u2605 Favorites" : "\u2606 Favorites"}
           </button>
+          <input
+            type="text"
+            placeholder="Filter by tag..."
+            value={filterTag}
+            onChange={(e) => setFilterTag(e.target.value)}
+            className="filter-input"
+          />
+          <input
+            type="color"
+            value={filterColor || "#000000"}
+            onChange={(e) => setFilterColor(e.target.value.replace("#", ""))}
+            className="color-filter"
+            title="Filter by dominant color"
+          />
+          {(filterTag || filterColor) && (
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => {
+                setFilterTag("");
+                setFilterColor("");
+              }}
+            >
+              Clear filters
+            </button>
+          )}
         </div>
         <div className="toolbar-right">
           {selectedPhotos.length > 0 && (
@@ -257,7 +294,13 @@ export default function GalleryPage() {
             <div
               key={photo.id}
               className={`photo-card ${selectedPhotos.includes(photo.id) ? "selected" : ""}`}
-              onClick={() => toggleSelect(photo.id)}
+              onClick={(e) => {
+                if (e.shiftKey) {
+                  setShowMetadataPanel(photo.id);
+                } else {
+                  toggleSelect(photo.id);
+                }
+              }}
               onDoubleClick={() => handlePhotoAction("preview", photo)}
               onContextMenu={(e) => handleContextMenu(photo, e)}
             >
@@ -285,6 +328,23 @@ export default function GalleryPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {showMetadataPanel && photoMetadatas[showMetadataPanel] && (
+        <div
+          className="metadata-panel-overlay"
+          onClick={() => setShowMetadataPanel(null)}
+        >
+          <div
+            className="metadata-panel-container"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <PhotoMetadataPanel
+              metadata={photoMetadatas[showMetadataPanel]}
+              onClose={() => setShowMetadataPanel(null)}
+            />
+          </div>
         </div>
       )}
 

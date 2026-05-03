@@ -1964,3 +1964,153 @@ ol {
   flex-wrap: wrap;
   gap: 4px;
 }
+
+/* Metadata Panel */
+.metadata-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.metadata-panel-container {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  width: 90%;
+}
+
+.metadata-panel {
+  padding: 20px;
+}
+
+.metadata-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.metadata-panel-header h3 {
+  margin: 0;
+}
+
+.metadata-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.metadata-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metadata-field label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Metrics */
+.metrics-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metric-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  min-width: 80px;
+}
+
+.metric-track {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.metric-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.metric-fill.good {
+  background: #22c55e;
+}
+.metric-fill.medium {
+  background: #f59e0b;
+}
+.metric-fill.low {
+  background: #ef4444;
+}
+
+.metric-value {
+  font-size: 0.8rem;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* EXIF Data */
+.exif-data {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.exif-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.exif-row:last-child {
+  border-bottom: none;
+}
+
+.exif-key {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.exif-value {
+  font-size: 0.8rem;
+}
+
+/* Filter inputs */
+.filter-input {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  width: 150px;
+}
+
+.color-filter {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 2px;
+}
