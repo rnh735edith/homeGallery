@@ -108,3 +108,103 @@ class OrganizationService:
             if photo.id not in existing:
                 album_photo = AlbumPhoto(album_id=album.id, photo_id=photo.id)
                 db.add(album_photo)
+
+    def compute_phash(self, file_path: str) -> int:
+        """Compute perceptual hash for an image. Returns 64-bit integer."""
+        if not os.path.exists(file_path):
+            return 0
+
+        try:
+            from PIL import Image
+            with Image.open(file_path) as img:
+                img = img.convert("L").resize((32, 32))
+                pixels = list(img.getdata())
+                avg = sum(pixels) / len(pixels)
+                bits = 0
+                for i, pixel in enumerate(pixels):
+                    if pixel > avg:
+                        bits |= (1 << i)
+                return bits
+        except Exception as e:
+            logger.warning(f"pHash computation failed for {file_path}: {e}")
+            return 0
+
+    def hash_distance(self, hash1: int, hash2: int) -> int:
+        """Compute Hamming distance between two hashes."""
+        xor = hash1 ^ hash2
+        return bin(xor).count("1")
+
+    def detect_duplicates(self, db: Session, threshold: int = 10) -> dict[str, int]:
+        """Detect duplicate photos using perceptual hashing.
+
+        Returns: { "photos_scanned": N, "duplicate_groups": M, "duplicates_marked": K }
+        """
+        from app.models.photo import Photo
+        from app.models.photo_metadata import PhotoMetadata
+
+        photos = db.query(Photo).filter(Photo.deleted == False).all()
+
+        if not photos:
+            return {"photos_scanned": 0, "duplicate_groups": 0, "duplicates_marked": 0}
+
+        hashes: dict[int, tuple] = {}
+        for photo in photos:
+            phash = self.compute_phash(photo.original_path)
+            if phash > 0:
+                hashes[photo.id] = (photo, phash)
+
+        # Group by hash distance using union-find
+        parent: dict[int, int] = {pid: pid for pid in hashes}
+
+        def find(x: int) -> int:
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        def union(x: int, y: int) -> None:
+            px, py = find(x), find(y)
+            if px != py:
+                parent[px] = py
+
+        photo_ids = list(hashes.keys())
+        for i in range(len(photo_ids)):
+            for j in range(i + 1, len(photo_ids)):
+                id1, id2 = photo_ids[i], photo_ids[j]
+                dist = self.hash_distance(hashes[id1][1], hashes[id2][1])
+                if dist < threshold:
+                    union(id1, id2)
+
+        # Group by root
+        groups: dict[int, list[int]] = {}
+        for pid in photo_ids:
+            root = find(pid)
+            groups.setdefault(root, []).append(pid)
+
+        # Mark duplicates
+        duplicate_groups = 0
+        duplicates_marked = 0
+
+        for root, group_ids in groups.items():
+            if len(group_ids) < 2:
+                continue
+            duplicate_groups += 1
+            group_ids.sort()
+            original_id = group_ids[0]
+
+            for dup_id in group_ids[1:]:
+                metadata = db.query(PhotoMetadata).filter(
+                    PhotoMetadata.photo_id == dup_id
+                ).first()
+                if not metadata:
+                    metadata = PhotoMetadata(photo_id=dup_id)
+                    db.add(metadata)
+                metadata.is_duplicate = True
+                metadata.duplicate_of = original_id
+                duplicates_marked += 1
+
+        return {
+            "photos_scanned": len(photos),
+            "duplicate_groups": duplicate_groups,
+            "duplicates_marked": duplicates_marked,
+        }
