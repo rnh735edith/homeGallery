@@ -72,6 +72,7 @@ export const photos = {
   fullImage: (id) => `/api/photos/${id}/full`,
   toggleFavorite: (id) => api.post(`/photos/${id}/favorite`),
   download: (id) => api.get(`/photos/${id}/download`, { responseType: "blob" }),
+  getDuplicates: () => api.get("/photos/duplicates"),
 };
 
 export const albums = {
