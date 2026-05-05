@@ -6,5 +6,6 @@ from app.models.task_queue import Task
 from app.models.photo_metadata import PhotoMetadata
 from app.models.api_key import ApiKey
 from app.models.contact import ContactMessage
+from app.models.telegram_config import TelegramConfig
 
-__all__ = ["User", "Photo", "Album", "AlbumPhoto", "Person", "FaceDetection", "Task", "PhotoMetadata", "ApiKey", "ContactMessage"]
+__all__ = ["User", "Photo", "Album", "AlbumPhoto", "Person", "FaceDetection", "Task", "PhotoMetadata", "ApiKey", "ContactMessage", "TelegramConfig"]
