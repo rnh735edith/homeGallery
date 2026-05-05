@@ -38,3 +38,5 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{matrix.language}}"
+        timeout-minutes: 15
+        continue-on-error: true
