@@ -1,0 +1,298 @@
+import base64
+import os
+
+SCREENSHOT_DIR = 'tests/e2e/setup-screenshots'
+
+def img_base64(filename):
+    path = os.path.join(SCREENSHOT_DIR, filename)
+    with open(path, 'rb') as f:
+        return base64.b64encode(f.read()).decode()
+
+html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HomeGallery - Setup Guide</title>
+  <style>
+    *{{box-sizing:border-box;margin:0;padding:0}}
+    :root{{--bg:#0f0f0f;--surface:#1a1a1a;--surface-2:#242424;--border:#333;--text:#e8e8e8;--text-muted:#888;--accent:#6366f1;--accent-hover:#818cf8;--success:#22c55e;--radius:12px;--shadow:0 4px 24px rgba(0,0,0,0.4)}}
+    html{{scroll-behavior:smooth}}
+    body{{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}}
+    .container{{max-width:960px;margin:0 auto;padding:0 24px}}
+    header{{background:linear-gradient(135deg,#1e1b4b 0%,#0f0f0f 100%);border-bottom:1px solid var(--border);padding:48px 0 32px;position:relative;overflow:hidden}}
+    header h1{{font-size:2.5rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent-hover));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}}
+    header p{{color:var(--text-muted);font-size:1.1rem}}
+    .badge{{display:inline-block;background:var(--surface-2);border:1px solid var(--border);padding:4px 12px;border-radius:20px;font-size:0.8rem;color:var(--success);margin-top:12px}}
+    nav{{position:sticky;top:0;background:rgba(15,15,15,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;padding:12px 0}}
+    nav ul{{list-style:none;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}}
+    nav a{{color:var(--text-muted);text-decoration:none;padding:6px 16px;border-radius:8px;font-size:0.9rem;transition:all .2s}}
+    nav a:hover{{color:var(--text);background:var(--surface-2)}}
+    section{{padding:40px 0}}
+    section h2{{font-size:1.8rem;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--border)}}
+    section h3{{font-size:1.3rem;margin:24px 0 12px;color:var(--accent-hover)}}
+    .steps{{display:flex;flex-direction:column;gap:32px}}
+    .step{{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}}
+    .step-header{{display:flex;align-items:center;gap:16px;padding:20px 24px;border-bottom:1px solid var(--border);background:var(--surface-2)}}
+    .step-num{{width:36px;height:36px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}}
+    .step-header h3{{font-size:1.2rem;margin:0;color:var(--text)}}
+    .step-content{{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:24px}}
+    .step-content p{{color:var(--text-muted);margin-bottom:12px}}
+    .step-content ul{{list-style:none;padding:0}}
+    .step-content li{{padding:8px 0 8px 24px;position:relative;color:var(--text-muted)}}
+    .step-content li::before{{content:"\\2713";position:absolute;left:0;color:var(--success)}}
+    .step-img{{border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--surface-2)}}
+    .step-img img{{width:100%;height:auto;display:block}}
+    .step-img .cap{{padding:8px 12px;font-size:0.8rem;color:var(--text-muted);text-align:center;border-top:1px solid var(--border)}}
+    code{{background:var(--surface-2);padding:2px 8px;border-radius:4px;font-family:Fira Code,Consolas,monospace;font-size:0.9em;color:var(--accent-hover)}}
+    pre{{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;overflow-x:auto;margin:16px 0}}
+    pre code{{background:none;padding:0;color:var(--text)}}
+    .info{{background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);border-radius:8px;padding:16px 20px;margin:16px 0}}
+    .info strong{{display:block;margin-bottom:8px}}
+    .info.success{{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3)}}
+    .grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin:24px 0}}
+    .card{{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:transform .2s,box-shadow .2s}}
+    .card:hover{{transform:translateY(-2px);box-shadow:var(--shadow)}}
+    .card h4{{font-size:1.1rem;margin-bottom:8px;color:var(--accent-hover)}}
+    .card p{{color:var(--text-muted);font-size:0.9rem}}
+    .card .status{{display:inline-block;background:rgba(34,197,94,0.15);color:var(--success);padding:2px 10px;border-radius:12px;font-size:0.75rem;margin-top:12px}}
+    .card img{{width:100%;border-radius:8px;margin-bottom:12px}}
+    table{{width:100%;border-collapse:collapse;margin:24px 0}}
+    th,td{{text-align:left;padding:12px 16px;border-bottom:1px solid var(--border)}}
+    th{{color:var(--text-muted);font-weight:600}}
+    @media(max-width:768px){{.step-content{{grid-template-columns:1fr}}header h1{{font-size:1.8rem}}nav ul{{gap:4px}}nav a{{padding:4px 10px;font-size:0.8rem}}}}
+    footer{{border-top:1px solid var(--border);padding:32px 0;text-align:center;color:var(--text-muted);font-size:0.9rem}}
+    footer a{{color:var(--accent);text-decoration:none}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>HomeGallery</h1>
+      <p>AI-powered photo gallery with smart organization, content analysis, and visual search.</p>
+      <span class="badge">v1.0.0 - All 6 Agent Phases + API Key Management</span>
+    </div>
+  </header>
+  <nav>
+    <div class="container">
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#quickstart">Quick Start</a></li>
+        <li><a href="#setup-wizard">Setup Wizard</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#api-keys">API Keys</a></li>
+        <li><a href="#agents">Agents</a></li>
+        <li><a href="#screenshots">Screenshots</a></li>
+        <li><a href="#commands">Commands</a></li>
+      </ul>
+    </div>
+  </nav>
+  <main class="container">
+    <section id="prerequisites">
+      <h2>Prerequisites</h2>
+      <ul>
+        <li><strong>Python 3.10+</strong> (3.14 recommended)</li>
+        <li><strong>Node.js 18+</strong> for frontend build</li>
+        <li><strong>Git</strong> for version control</li>
+      </ul>
+      <div class="info">
+        <strong>Windows Note</strong>
+        If your Python path contains spaces (e.g., <code>C:\\Users\\Ravi Hegde\\...</code>), always use <code>python manage.py start</code> instead of <code>Start-Process</code>.
+      </div>
+    </section>
+    <section id="quickstart">
+      <h2>Quick Start</h2>
+      <p>Start the server in background mode:</p>
+      <pre><code>python manage.py start</code></pre>
+      <p>Then open <code>http://localhost:8080</code> in your browser.</p>
+      <div class="info success">
+        <strong>Default Credentials</strong>
+        Username: <code>testadmin</code> | Password: <code>TestPass123!</code>
+      </div>
+    </section>
+    <section id="setup-wizard">
+      <h2>Setup Wizard</h2>
+      <p>On first launch, HomeGallery guides you through a multi-step setup wizard.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-header"><div class="step-num">1</div><h3>Photo Library Path</h3></div>
+          <div class="step-content">
+            <div>
+              <p>Configure the directory containing your photos. The server will scan and index all images recursively.</p>
+              <ul>
+                <li>Supported formats: JPEG, PNG, WebP, GIF</li>
+                <li>Max file size: 50MB (configurable)</li>
+                <li>Recursive subdirectory scanning</li>
+                <li>Safe path validation prevents directory traversal</li>
+              </ul>
+            </div>
+            <div class="step-img"><img src="data:image/png;base64,{img_base64('01-setup-step1-library.png')}" alt="Step 1: Photo Library"><div class="cap">Step 1: Photo Library</div></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-header"><div class="step-num">2</div><h3>Admin Account</h3></div>
+          <div class="step-content">
+            <div>
+              <p>Create your admin account for managing the gallery. All subsequent access requires authentication.</p>
+              <ul>
+                <li>Password: minimum 6 characters, mixed case + numbers</li>
+                <li>JWT token expiry: 24 hours (configurable)</li>
+                <li>Passwords: bcrypt hashed (never stored in plain text)</li>
+                <li>Rate limiting: 5 attempts per 15 minutes per IP</li>
+              </ul>
+            </div>
+            <div class="step-img"><img src="data:image/png;base64,{img_base64('03-setup-step2-admin.png')}" alt="Step 2: Admin Account"><div class="cap">Step 2: Admin Account</div></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-header"><div class="step-num">3</div><h3>Server Configuration</h3></div>
+          <div class="step-content">
+            <div>
+              <p>Configure the server host and port for your HomeGallery instance.</p>
+              <ul>
+                <li>Default host: 0.0.0.0 (all interfaces)</li>
+                <li>Default port: 8080</li>
+                <li>Use 0.0.0.0 to allow network access</li>
+              </ul>
+            </div>
+            <div class="step-img"><img src="data:image/png;base64,{img_base64('05-setup-step3-server.png')}" alt="Step 3: Server Configuration"><div class="cap">Step 3: Server Configuration</div></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-header"><div class="step-num">4</div><h3>Database</h3></div>
+          <div class="step-content">
+            <div>
+              <p>Choose your database backend. SQLite is recommended for single-user setups.</p>
+              <ul>
+                <li>SQLite: Local, zero configuration</li>
+                <li>PostgreSQL: Remote, for scaling</li>
+                <li>Database URL configurable</li>
+              </ul>
+            </div>
+            <div class="step-img"><img src="data:image/png;base64,{img_base64('06-setup-step4-database.png')}" alt="Step 4: Database"><div class="cap">Step 4: Database</div></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-header"><div class="step-num">5</div><h3>Background Processing</h3></div>
+          <div class="step-content">
+            <div>
+              <p>Configure automatic processing options for thumbnails and face detection.</p>
+              <ul>
+                <li>Auto-generate thumbnails on upload</li>
+                <li>Background face detection (requires more memory)</li>
+                <li>All options changeable later in Settings</li>
+              </ul>
+            </div>
+            <div class="step-img"><img src="data:image/png;base64,{img_base64('07-setup-step5-processing.png')}" alt="Step 5: Processing"><div class="cap">Step 5: Background Processing</div></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-header"><div class="step-num">6</div><h3>Review & Save</h3></div>
+          <div class="step-content">
+            <div>
+              <p>Review your configuration before saving. All settings can be edited later via config.json.</p>
+              <ul>
+                <li>Photo directory path</li>
+                <li>Admin username</li>
+                <li>Server host and port</li>
+                <li>Database type</li>
+              </ul>
+            </div>
+            <div class="step-img"><img src="data:image/png;base64,{img_base64('08-setup-step6-review.png')}" alt="Step 6: Review"><div class="cap">Step 6: Review Configuration</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="features">
+      <h2>Features</h2>
+      <div class="grid">
+        <div class="card"><h4>Smart Metadata</h4><p>Automatic EXIF extraction, object detection, color analysis, and tag generation.</p><span class="status">Complete</span></div>
+        <div class="card"><h4>Auto-Organization</h4><p>Date-based albums, GPS clustering, pHash duplicate detection, best-shot suggestions.</p><span class="status">Complete</span></div>
+        <div class="card"><h4>Enhancement</h4><p>Histogram analysis, scene-aware presets (portrait, landscape, night), PIL enhancement.</p><span class="status">Complete</span></div>
+        <div class="card"><h4>Content Analysis</h4><p>Sharpness scoring, exposure analysis, noise detection, quality metrics, composition.</p><span class="status">Complete</span></div>
+        <div class="card"><h4>Visual Search</h4><p>128-dim feature embeddings, text-to-image search, similarity-based discovery.</p><span class="status">Complete</span></div>
+        <div class="card"><h4>MCP Integration</h4><p>7 MCP servers for image analysis, agent control, browser automation, docs access.</p><span class="status">Complete</span></div>
+      </div>
+    </section>
+    <section id="api-keys">
+      <h2>API Key Management</h2>
+      <p>HomeGallery supports external AI providers for cloud-based analysis. API keys are encrypted at rest using Fernet symmetric encryption with a SHA-256 derived key from your SECRET_KEY.</p>
+      <div class="info">
+        <strong>Security</strong>
+        Keys are encrypted before storage. Only masked versions are shown in the UI and API responses. Admin-only access required via <code>get_current_admin_user</code> dependency. No logging of API key values.
+      </div>
+      <h3>Supported Providers</h3>
+      <table>
+        <thead><tr><th>Provider</th><th>Use Case</th><th>Key Format</th></tr></thead>
+        <tbody>
+          <tr><td><strong>OpenAI</strong></td><td>ChatGPT image analysis</td><td><code>sk-proj-...</code></td></tr>
+          <tr><td><strong>Google Gemini</strong></td><td>Gemini vision model</td><td><code>AIzaSy...</code></td></tr>
+          <tr><td><strong>OpenRouter</strong></td><td>Multi-model routing</td><td><code>sk-or-v1-...</code></td></tr>
+          <tr><td><strong>Anthropic</strong></td><td>Claude vision</td><td><code>sk-ant-...</code></td></tr>
+        </tbody>
+      </table>
+      <h3>Managing Keys</h3>
+      <p>Go to <strong>Settings > API Keys</strong> to add, enable/disable, or delete API keys. Keys are validated on save and encrypted immediately.</p>
+      <h3>API Endpoints</h3>
+      <pre><code>GET    /api/api-keys          # List all keys (admin only)
+GET    /api/api-keys/{{id}}     # Get single key (admin only)
+POST   /api/api-keys          # Create new key (admin only)
+PUT    /api/api-keys/{{id}}     # Update key (admin only)
+DELETE /api/api-keys/{{id}}     # Delete key (admin only)</code></pre>
+    </section>
+    <section id="agents">
+      <h2>Agent System</h2>
+      <p>5 autonomous agents run background processing jobs. All disabled by default. Enable via Settings > Agents.</p>
+      <table>
+        <thead><tr><th>Agent</th><th>Interval</th><th>Function</th></tr></thead>
+        <tbody>
+          <tr><td>Smart Metadata</td><td>Every 5 min</td><td>EXIF, objects, colors, tags extraction</td></tr>
+          <tr><td>Auto-Organization</td><td>Every 15 min</td><td>Date albums, GPS clusters, duplicate detection</td></tr>
+          <tr><td>Enhancement</td><td>Every 10 min</td><td>Histogram analysis, scene presets, quality scoring</td></tr>
+          <tr><td>Content Analysis</td><td>Every 10 min</td><td>Sharpness, exposure, noise, composition metrics</td></tr>
+          <tr><td>Visual Search</td><td>Every 10 min</td><td>Feature extraction, embeddings, similarity search</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="screenshots">
+      <h2>Screenshots</h2>
+      <div class="grid">
+        <div class="card"><h4>Gallery</h4><img src="data:image/png;base64,{img_base64('11-gallery.png')}" alt="Gallery"><p>Browse photos with search, filters, and quality badges.</p></div>
+        <div class="card"><h4>Albums</h4><img src="data:image/png;base64,{img_base64('12-albums.png')}" alt="Albums"><p>Organize photos into albums or let auto-organization create date-based albums.</p></div>
+        <div class="card"><h4>Duplicates</h4><img src="data:image/png;base64,{img_base64('13-duplicates.png')}" alt="Duplicates"><p>Identify duplicate photos using perceptual hashing (pHash).</p></div>
+        <div class="card"><h4>Dashboard</h4><img src="data:image/png;base64,{img_base64('14-dashboard.png')}" alt="Dashboard"><p>Monitor system health, agent status, and storage usage.</p></div>
+        <div class="card"><h4>Settings</h4><img src="data:image/png;base64,{img_base64('15-settings-general.png')}" alt="Settings"><p>Configure server, processing, and security settings.</p></div>
+        <div class="card"><h4>API Keys</h4><img src="data:image/png;base64,{img_base64('16-settings-api-keys.png')}" alt="API Keys"><p>Manage encrypted API keys for external AI providers.</p></div>
+        <div class="card"><h4>Agents</h4><img src="data:image/png;base64,{img_base64('17-settings-agents.png')}" alt="Agents"><p>Monitor and control all 5 autonomous analysis agents.</p></div>
+        <div class="card"><h4>Mobile</h4><img src="data:image/png;base64,{img_base64('18-mobile-gallery.png')}" alt="Mobile"><p>Fully responsive design works beautifully on mobile devices.</p></div>
+      </div>
+    </section>
+    <section id="commands">
+      <h2>Quick Commands</h2>
+      <table>
+        <thead><tr><th>Action</th><th>Command</th></tr></thead>
+        <tbody>
+          <tr><td>Start server</td><td><code>python manage.py start</code></td></tr>
+          <tr><td>Foreground mode</td><td><code>python start.py</code></td></tr>
+          <tr><td>Stop server</td><td><code>python manage.py stop</code></td></tr>
+          <tr><td>Restart server</td><td><code>python manage.py restart</code></td></tr>
+          <tr><td>E2E tests</td><td><code>npx playwright test</code></td></tr>
+          <tr><td>Unit tests</td><td><code>cd backend ; pytest tests/unit/</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+  <footer>
+    <div class="container">
+      <p>HomeGallery v1.0.0 - FastAPI + React + AI Agents</p>
+      <p style="margin-top:8px"><a href="https://github.com/anomalyco/homeGallery">GitHub</a> | <a href="https://github.com/anomalyco/homeGallery/blob/main/README.md">Docs</a></p>
+    </div>
+  </footer>
+</body>
+</html>'''
+
+with open('docs/Setup.html', 'w') as f:
+    f.write(html)
+
+print('Setup.html regenerated with new screenshots!')
+print(f'Used {len(os.listdir(SCREENSHOT_DIR))} screenshots from {SCREENSHOT_DIR}')

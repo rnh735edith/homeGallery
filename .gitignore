@@ -10,7 +10,10 @@
 /blob-report/
 /playwright/.cache/
 /.playwright-mcp/
+.playwright-cli
+.playwright/
 /playwright-mcp/
+.lastr
 
 # next.js
 /.next/
@@ -64,3 +67,6 @@ dist/
 
 # OS thumbnails cache
 **/Thumbs.db
+
+# ruflo
+ruflo/

@@ -49,6 +49,7 @@ export default function SettingsPage() {
   const [editingKey, setEditingKey] = useState(null);
   const [contactMessages, setContactMessages] = useState([]);
   const [contactLoading, setContactLoading] = useState(false);
+  const [networkInfo, setNetworkInfo] = useState(null);
 
   const fetchAgents = useAgentStore((state) => state.fetchAgents);
   const agents = useAgentStore((state) => state.agents);
@@ -58,6 +59,7 @@ export default function SettingsPage() {
   useEffect(() => {
     loadSettings();
     loadStatus();
+    loadNetworkInfo();
   }, []);
 
   useEffect(() => {
@@ -94,14 +96,19 @@ export default function SettingsPage() {
 
   const loadStatus = async () => {
     try {
-      const [sys, db] = await Promise.all([
-        api.management.getStatus().catch(() => null),
-        api.management.getDbStatus().catch(() => null),
-      ]);
-      if (sys) setSysStatus(sys.data);
-      if (db) setDbStatus(db.data);
-    } catch (e) {
-      console.error("Failed to load status", e);
+      const res = await api.get("/management/status");
+      setSysStatus(res.data);
+    } catch (err) {
+      console.error("Failed to load status", err);
+    }
+  };
+
+  const loadNetworkInfo = async () => {
+    try {
+      const res = await api.get("/management/network");
+      setNetworkInfo(res.data);
+    } catch (err) {
+      console.error("Failed to load network info", err);
     }
   };
 
@@ -430,6 +437,33 @@ export default function SettingsPage() {
 
       {activeTab === "general" && (
         <div className="settings-grid">
+          <SettingSection title="Network" icon="network">
+            {networkInfo ? (
+              <>
+                <div className="network-status">
+                  <div className="network-item">
+                    <label>Internal Address</label>
+                    <code>{networkInfo.internal}</code>
+                  </div>
+                  <div className="network-item">
+                    <label>External Address</label>
+                    <code>{networkInfo.external || "Not configured"}</code>
+                  </div>
+                  <div className="network-item">
+                    <label>Server Status</label>
+                    <span
+                      className={`status-badge ${networkInfo.reachable ? "status-online" : "status-offline"}`}
+                    >
+                      {networkInfo.reachable ? "Online" : "Offline"}
+                    </span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="loading">Loading network info...</div>
+            )}
+          </SettingSection>
+
           <SettingSection title="Server" icon="server">
             <div className="form-group">
               <label>Host</label>

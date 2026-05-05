@@ -2856,3 +2856,52 @@ ol {
   padding: 40px 20px;
   color: var(--text-muted);
 }
+
+/* Network Status */
+.network-status {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.network-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.network-item label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.network-item code {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--accent);
+  background: var(--bg-card);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  word-break: break-all;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-online {
+  background: var(--success);
+  color: white;
+}
+
+.status-offline {
+  background: var(--error);
+  color: white;
+}

@@ -1,0 +1,44 @@
+﻿{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "github": {
+      "type": "github",
+      "repo": "rnh735edith/homeGallery"
+    },
+    "context7": {
+      "type": "context7"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git"],
+      "env": {
+        "GIT_ALLOW_PROTOCOL": "ssh https"
+      }
+    },
+    "homegallery-image": {
+      "command": "python",
+      "args": ["backend/app/mcp/image_server.py"],
+      "env": {
+        "DATA_DIR": "${DATA_DIR}",
+        "PHOTO_DIR": "${PHOTO_DIR}",
+        "THUMBNAIL_DIR": "${THUMBNAIL_DIR}"
+      },
+      "description": "Image analysis tools: analyze_image, compute_hash, extract_features, generate_thumbnail"
+    },
+    "homegallery-agents": {
+      "command": "python",
+      "args": ["backend/app/mcp/agent_server.py"],
+      "env": {
+        "API_BASE_URL": "http://localhost:8080/api"
+      },
+      "description": "Agent management tools: get_agent_status, run_agent, stop_agent, start_agent, get_task_queue, cancel_task"
+    }
+  }
+}

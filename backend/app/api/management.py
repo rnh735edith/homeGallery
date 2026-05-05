@@ -1,5 +1,6 @@
 import os
 import json
+import socket
 import shutil
 import zipfile
 import tempfile
@@ -528,3 +529,50 @@ def create_db_backup(
 
     logger.info(f"Database backup created: {backup_path} by {current_user.username}")
     return FileResponse(backup_path, media_type="application/octet-stream", filename=os.path.basename(backup_path))
+
+
+@router.get("/network")
+def get_network_info(
+    current_user: User = Depends(get_current_admin_user),
+):
+    """Get network information including internal and external IP addresses."""
+    config = config_loader.load() or {}
+    server = config.get("server", {})
+    host = server.get("host", "0.0.0.0")
+    port = server.get("port", 8080)
+
+    # Get internal IP
+    internal_ip = "127.0.0.1"
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        internal_ip = s.getsockname()[0]
+        s.close()
+    except Exception:
+        pass
+
+    internal_address = f"http://{internal_ip}:{port}"
+
+    # Try to get external IP (using public DNS or web service)
+    external_ip = None
+    try:
+        # Try DNS first
+        external_ip = socket.gethostbyname("myip.opendns.com")
+    except Exception:
+        try:
+            # Fallback to web service
+            import urllib.request
+            with urllib.request.urlopen("https://api.ipify.org", timeout=3) as resp:
+                external_ip = resp.read().decode().strip()
+        except Exception:
+            external_ip = None
+
+    external_address = f"http://{external_ip}:{port}" if external_ip else None
+
+    return {
+        "internal": internal_address,
+        "external": external_address,
+        "reachable": True,
+        "host": host,
+        "port": port,
+    }
