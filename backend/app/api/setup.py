@@ -63,6 +63,21 @@ def configure_setup(data: SetupRequest):
 
         config_path = config_loader.save(config)
 
+        from app.database import SessionFactory, init_db
+        from app.models.user import User
+        init_db()
+        db = SessionFactory()
+        existing_admin = db.query(User).filter(User.username == data.admin.username).first()
+        if not existing_admin:
+            admin_user = User(
+                username=data.admin.username,
+                password_hash=hash_password(data.admin.password),
+                is_admin=True,
+            )
+            db.add(admin_user)
+            db.commit()
+        db.close()
+
         if data.notifications and data.notifications.bot_token and data.notifications.chat_id:
             from app.database import SessionFactory
             db = SessionFactory()
