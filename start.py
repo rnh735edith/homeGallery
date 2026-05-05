@@ -18,7 +18,6 @@ import sys
 import time
 import threading
 import subprocess
-import signal
 
 repo_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, repo_root)
@@ -249,7 +248,7 @@ def main():
         time.sleep(1)
 
         # Start MCP
-        mcp_process = start_playwright_mcp(8081)
+        start_playwright_mcp(8081)
 
         # Start server
         start_server(port=port, host=host)
@@ -287,6 +286,7 @@ def main():
                     import webbrowser
                     webbrowser.open(f"http://localhost:{port}/setup")
                 except Exception:
+                    # Browser open failed - non-critical, continue server start
                     pass
 
             threading.Thread(target=open_browser, daemon=True).start()

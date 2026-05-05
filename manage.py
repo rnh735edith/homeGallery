@@ -50,8 +50,10 @@ def find_server_pid():
                     os.kill(pid, 0)
                     return pid
             except Exception:
+                # Process not running or inaccessible - continue checking
                 pass
         except (ValueError, IOError):
+            # PID file corrupted or missing - continue
             pass
     return None
 
@@ -74,6 +76,7 @@ def find_all_python_servers():
                             pids.append(int(part))
                             break
         except Exception:
+            # Failed to query process list - return what we found
             pass
     return pids
 
@@ -96,7 +99,7 @@ def start_server(port=8080, setup=False):
         pid = find_server_pid()
         if pid:
             print(f"  PID: {pid}")
-        return
+        return pid
 
     # Stop existing servers first
     stop_server()
@@ -197,6 +200,7 @@ def stop_server():
                 os.kill(p, 15)
                 print(f"  Stopped server process (PID: {p})")
         except Exception:
+            # Process already stopped or insufficient permissions
             pass
 
 
@@ -227,6 +231,7 @@ def status_server(port=8080):
             print(f"  Health: {data.get('status', 'unknown')}")
             print(f"  Version: {data.get('version', 'unknown')}")
         except Exception:
+            # Server not responding to health check - show basic status
             pass
 
     all_pids = find_all_python_servers()

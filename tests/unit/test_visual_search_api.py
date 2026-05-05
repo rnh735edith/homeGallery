@@ -9,8 +9,6 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.models.user import User
-from app.models.photo import Photo
-from app.models.photo_metadata import PhotoMetadata
 
 
 @pytest.fixture

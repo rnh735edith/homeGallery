@@ -12,8 +12,6 @@ Tools:
 import os
 import json
 import logging
-from pathlib import Path
-from typing import Optional
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("homegallery.mcp.image")
@@ -50,6 +48,7 @@ def analyze_image(path: str) -> dict:
                 try:
                     exif_summary[tag_name] = str(value)
                 except Exception:
+                    # Skip EXIF tags that can't be converted to string
                     pass
 
             return {

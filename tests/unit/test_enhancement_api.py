@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from fastapi.responses import FileResponse
-from fastapi import HTTPException, status
 from app.api.enhancement import get_suggestions, apply_enhancement, get_enhanced_image
 from app.schemas.enhancement import EnhancementApplyRequest
 from app.models.photo import Photo

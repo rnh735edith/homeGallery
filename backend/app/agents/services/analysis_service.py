@@ -137,10 +137,6 @@ class AnalysisService:
             img = Image.open(file_path).convert("L").resize((300, 300))
             arr = np.array(img)
 
-            # Find edges (simple gradient)
-            edges_x = np.abs(arr[:, 1:] - arr[:, :-1])
-            edges_y = np.abs(arr[1:, :] - arr[:-1, :])
-
             # Define rule of thirds grid intersections
             h, w = arr.shape
             intersections = [

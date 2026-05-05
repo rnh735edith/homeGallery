@@ -2,7 +2,6 @@ import os
 import uuid
 import shutil
 import logging
-from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
@@ -14,10 +13,10 @@ from app.config import get_settings
 from app.database import get_db
 from app.models.photo import Photo
 from app.models.user import User
-from app.schemas.photo import PhotoCreate, PhotoResponse, PhotoUpdate, PhotoListResponse
+from app.schemas.photo import PhotoResponse, PhotoUpdate, PhotoListResponse
 from app.services.image_processor import ImageProcessor
 from app.services.thumbnail_service import ThumbnailService
-from app.utils.security import get_current_user, get_current_admin_user
+from app.utils.security import get_current_user
 
 logger = logging.getLogger(__name__)
 

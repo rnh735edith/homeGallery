@@ -1,6 +1,5 @@
 import os
 import logging
-from datetime import datetime
 from typing import Optional
 from PIL import Image
 import numpy as np
@@ -54,6 +53,7 @@ class MetadataService:
                     try:
                         exif_data[tag_name] = str(value)
                     except Exception:
+                        # Skip tags that can't be converted to string
                         pass
 
                 if "Model" in exif_data:
@@ -218,11 +218,12 @@ class MetadataService:
                         clues.append("night")
                     elif hour < 10:
                         clues.append("morning")
-                    elif 10 <= hour < 17:
+                    elif hour < 17:
                         clues.append("daytime")
                     else:
                         clues.append("evening")
                 except (ValueError, IndexError):
+                    # Invalid DateTimeOriginal format - skip time-based clues
                     pass
 
             if "DigitalZoomRatio" in exif_data:

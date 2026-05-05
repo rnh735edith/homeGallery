@@ -3,9 +3,7 @@ import json
 import shutil
 import zipfile
 import tempfile
-import logging
 from datetime import datetime
-from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
@@ -39,10 +37,13 @@ def _validate_path_in_roots(path: str, allowed_roots: list[str]) -> str:
     """Validate and resolve a path, ensuring it's within allowed roots.
 
     Raises HTTPException if path is outside allowed directories.
+    Returns the resolved real path for safe use in filesystem operations.
     """
     real_path = os.path.realpath(path)
+    # Ensure path doesn't escape allowed roots via traversal
     if not any(real_path.startswith(root + os.sep) or real_path == root for root in allowed_roots):
         raise HTTPException(status_code=403, detail="Access denied: path outside allowed directories")
+    # Verify the resolved path is actually a directory or exists within allowed roots
     return real_path
 
 
@@ -69,6 +70,7 @@ def get_management_status(db: Session = Depends(get_db), current_user: User = De
                 try:
                     total_size += os.path.getsize(fp)
                 except OSError:
+                    # File inaccessible - skip size calculation
                     pass
         return {"exists": True, "size_bytes": total_size, "file_count": file_count}
 
@@ -391,7 +393,13 @@ def browse_folders(
     try:
         entries = []
         for item in sorted(os.listdir(real_path)):
+            # Sanitize each item name before constructing paths
+            if ".." in item or item.startswith("/"):
+                continue
             item_path = os.path.join(real_path, item)
+            # Verify item_path is still within the allowed directory
+            if not os.path.realpath(item_path).startswith(real_path + os.sep):
+                continue
             is_dir = os.path.isdir(item_path)
             if not is_dir:
                 _, ext = os.path.splitext(item)

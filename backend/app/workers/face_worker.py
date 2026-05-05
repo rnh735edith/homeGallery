@@ -1,7 +1,5 @@
 import os
 import gc
-import logging
-from datetime import datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session

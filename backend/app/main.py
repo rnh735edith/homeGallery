@@ -142,7 +142,9 @@ async def serve_frontend(full_path: str):
             if os.path.isfile(frontend_index):
                 return FileResponse(frontend_index)
         file_path = os.path.realpath(os.path.join(frontend_dist, full_path))
-        if not file_path.startswith(os.path.realpath(frontend_dist)):
+        frontend_dist_real = os.path.realpath(frontend_dist)
+        # Ensure the resolved path is within the frontend dist directory
+        if not file_path.startswith(frontend_dist_real + os.sep) and file_path != frontend_dist_real:
             if os.path.isfile(frontend_index):
                 return FileResponse(frontend_index)
         if os.path.isfile(file_path):

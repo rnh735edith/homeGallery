@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from app.agents.services.organization_service import OrganizationService
 from app.config import get_settings
 

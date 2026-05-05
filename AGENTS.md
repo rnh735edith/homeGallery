@@ -4,6 +4,44 @@
 
 > **CRITICAL**: These rules govern ALL development activities. Violations must be self-corrected immediately.
 
+### Commit & Push Safety
+
+> **NEVER commit or push without explicit user approval.** This is the highest-priority rule.
+
+**Mandatory Pre-Commit Checklist:**
+1. All tests must pass (`pytest tests/unit/ -q` and `npx playwright test --reporter=list`)
+2. No secrets, tokens, passwords, or API keys in code or commits
+3. No debug files, temp files, or IDE artifacts staged
+4. Commit message follows conventional format: `type: description`
+5. Changes reviewed by user before commit
+
+**Workflow:**
+1. Make all changes and `git add` them
+2. Run `git status` and `git diff --staged` to show user what will be committed
+3. **Ask user for approval** before running `git commit`
+4. If user rejects: keep files staged, do NOT unstage
+5. If user approves: commit with descriptive message
+6. **Ask user again** before running `git push`
+7. Only push after explicit user confirmation
+
+**Exception:** User says "commit and push" or "go ahead" — then proceed with both.
+
+### Secret Handling
+
+**NEVER log or expose:**
+- Passwords, API keys, tokens, secrets, JWT tokens
+- Database connection strings with credentials
+- Encryption keys, private keys
+- Personal identifiable information (PII)
+
+**Rules:**
+- Use `mask_key()` for any API key display
+- Log only usernames (not passwords) on auth events
+- Log only file paths (not file contents)
+- Use environment variables or `data/config.json` (gitignored) for secrets
+- GitHub Actions secrets go through `${{ secrets.* }}` — never hardcode
+- If a secret accidentally appears in a commit: warn user immediately, suggest `git revert`
+
 ### TDD (Test-Driven Development) Workflow
 
 **MANDATORY ORDER OF OPERATIONS:**

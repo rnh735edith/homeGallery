@@ -23,6 +23,9 @@ Standalone, lightweight home image processing server with gallery, albums, photo
 5. Individual routers should NOT add their own prefix (parent adds `/api`)
 6. bcrypt must be `<5.0.0` for passlib compatibility
 7. Frontend MUST be built before production serving
+8. **NEVER commit or push without explicit user approval** — stage changes, show user, wait for approval
+9. **NEVER log secrets** — passwords, tokens, API keys, JWT secrets must never appear in logs
+10. If user rejects a commit: keep files staged, do NOT unstage
 
 ### Environment
 - **OS**: Windows 10 (dev), must support Linux/Mac

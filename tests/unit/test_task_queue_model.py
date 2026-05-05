@@ -1,4 +1,3 @@
-import pytest
 from datetime import datetime
 from app.models.task_queue import Task
 

@@ -14,7 +14,6 @@ Tools:
 import os
 import json
 import logging
-from typing import Optional
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("homegallery.mcp.agent")

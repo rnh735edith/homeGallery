@@ -1,8 +1,7 @@
 import pytest
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from PIL import Image
-import numpy as np
 from app.agents.services.enhancement_service import EnhancementService
 from app.config import get_settings
 

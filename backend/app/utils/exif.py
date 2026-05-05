@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from PIL import Image
-from PIL.ExifTags import TAGS, GPSTAGS
+from PIL.ExifTags import TAGS
 
 
 def get_taken_at(image: Image.Image) -> Optional[datetime]:
@@ -44,6 +44,7 @@ def get_camera_info(image: Image.Image) -> dict:
             try:
                 info[tag_name] = str(value)
             except Exception:
+                # Skip camera info tags that can't be converted
                 pass
 
     return info
@@ -65,6 +66,7 @@ def get_exif_data(image: Image.Image) -> dict:
             try:
                 result[tag_name] = str(value)
             except Exception:
+                # Skip EXIF tags that can't be converted to string
                 pass
 
     taken_at = get_taken_at(image)

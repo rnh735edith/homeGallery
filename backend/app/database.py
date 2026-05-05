@@ -1,4 +1,4 @@
-﻿from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.pool import StaticPool, QueuePool
 from app.config import get_settings

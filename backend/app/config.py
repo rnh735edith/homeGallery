@@ -63,6 +63,7 @@ def get_settings() -> Settings:
                 if os.environ.get("DATA_DIR") is None:
                     settings.DATA_DIR = config.get("storage", {}).get("photo_dir", settings.DATA_DIR).rsplit("/", 1)[0]
     except ImportError:
+        # config_loader not available - use defaults
         pass
 
     return settings

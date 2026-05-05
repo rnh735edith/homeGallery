@@ -6,7 +6,6 @@ Optional CLIP support for semantic search (graceful fallback if not available).
 import os
 import logging
 from typing import Optional, List, Dict, Any
-from pathlib import Path
 
 import numpy as np
 from PIL import Image

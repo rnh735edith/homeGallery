@@ -4,8 +4,6 @@ Following TDD: GREEN phase - fix tests to match implementation.
 """
 import pytest
 from unittest.mock import MagicMock, patch
-from datetime import datetime
-import os
 
 from app.agents.search_agent import SearchAgent
 from app.config import get_settings

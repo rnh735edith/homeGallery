@@ -7,7 +7,6 @@ import numpy as np
 from unittest.mock import MagicMock, patch
 from PIL import Image
 import os
-import tempfile
 
 from app.agents.services.search_service import SearchService
 from app.config import get_settings
