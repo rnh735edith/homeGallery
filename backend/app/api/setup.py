@@ -1,4 +1,5 @@
 import os
+import logging
 from fastapi import APIRouter, HTTPException
 from app.config_loader import config_loader
 from app.schemas.setup import (
@@ -7,6 +8,8 @@ from app.schemas.setup import (
     SetupSuccessResponse,
 )
 from app.utils.security import hash_password
+from app.models.telegram_config import TelegramConfig
+from app.utils.encryption import encrypt_value
 
 router = APIRouter(prefix="/setup", tags=["setup"])
 
@@ -59,6 +62,18 @@ def configure_setup(data: SetupRequest):
             os.makedirs(directory, exist_ok=True)
 
         config_path = config_loader.save(config)
+
+        if data.notifications and data.notifications.bot_token and data.notifications.chat_id:
+            from app.database import SessionLocal
+            db = SessionLocal()
+            telegram_config = TelegramConfig(
+                enabled=data.notifications.enabled,
+                bot_token_encrypted=encrypt_value(data.notifications.bot_token),
+                chat_id=data.notifications.chat_id,
+            )
+            db.add(telegram_config)
+            db.commit()
+            db.close()
 
         return SetupSuccessResponse(
             message="Configuration saved successfully",

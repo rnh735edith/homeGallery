@@ -24,6 +24,14 @@ DEFAULT_CONFIG = {
         "max_concurrent_tasks": 2,
     },
     "security": {"jwt_secret": None, "jwt_expire_minutes": 1440},
+    "notifications": {
+        "telegram": {
+            "enabled": False,
+            "bot_token": "",
+            "chat_id": "",
+            "event_types": ["server_start", "error_critical"],
+        },
+    },
 }
 
 

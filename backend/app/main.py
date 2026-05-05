@@ -1,5 +1,6 @@
 import os
 import time
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -8,7 +9,7 @@ from fastapi.responses import FileResponse
 
 from app.logging_config import setup_logging, get_logger
 from app.config import get_settings
-from app.database import init_db
+from app.database import init_db, SessionLocal
 from app.api import api_router
 from app.workers.face_worker import FaceWorker
 from app.workers.thumbnail_worker import ThumbnailWorker
@@ -18,6 +19,8 @@ from app.agents.organization_agent import OrganizationAgent
 from app.agents.enhancement_agent import EnhancementAgent
 from app.agents.analysis_agent import AnalysisAgent
 from app.agents.search_agent import SearchAgent
+from app.services.notification_hub import NotificationHub
+from app.services.telegram_service import TelegramService
 import app.api.agents as agents_api
 
 setup_logging()
@@ -79,12 +82,38 @@ async def lifespan(app: FastAPI):
     orchestrator.start_all()
     logger.info("Agent orchestrator started")
 
+    notification_hub = NotificationHub()
+    try:
+        db = SessionLocal()
+        telegram_service = TelegramService.from_db(db)
+        notification_hub.register("telegram", telegram_service)
+        db.close()
+    except Exception as e:
+        logger.warning(f"Failed to initialize Telegram notifications: {e}")
+
+    async def _notify_startup():
+        try:
+            settings = get_settings()
+            await notification_hub.notify_async(
+                "server_start",
+                server_url=f"http://{settings.HOST}:{settings.PORT}",
+            )
+        except Exception as e:
+            logger.debug(f"Startup notification error: {e}")
+
+    asyncio.create_task(_notify_startup())
+    app.state.notification_hub = notification_hub
+
     logger.info("=" * 60)
     logger.info("HomeGallery backend ready")
 
     yield
 
     logger.info("Shutting down HomeGallery backend...")
+    try:
+        await notification_hub.notify_async("server_shutdown")
+    except Exception:
+        pass
     face_worker.stop()
     thumbnail_worker.stop()
     orchestrator.stop_all()

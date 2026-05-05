@@ -31,12 +31,19 @@ class SetupProcessing(BaseModel):
     max_concurrent_tasks: int = 2
 
 
+class SetupNotifications(BaseModel):
+    enabled: bool = False
+    bot_token: Optional[str] = None
+    chat_id: Optional[str] = None
+
+
 class SetupRequest(BaseModel):
     storage: SetupStorage
     admin: SetupAdmin
     server: SetupServer
     database: SetupDatabase
     processing: SetupProcessing
+    notifications: Optional[SetupNotifications] = None
 
 
 class SetupStatusResponse(BaseModel):
