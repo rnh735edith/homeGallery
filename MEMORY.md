@@ -23,9 +23,15 @@ Standalone, lightweight home image processing server with gallery, albums, photo
 5. Individual routers should NOT add their own prefix (parent adds `/api`)
 6. bcrypt must be `<5.0.0` for passlib compatibility
 7. Frontend MUST be built before production serving
-8. **NEVER commit or push without explicit user approval** — stage changes, show user, wait for approval
+8. **MANDATORY Git Workflow**:
+   - Always start from `git checkout main && git pull origin main`
+   - Create feature branch: `git checkout -b feature/<name>`
+   - All implementation and testing on the feature branch ONLY — never work on main
+   - Verify ALL tests pass before asking for approval
+   - **Always ask user explicitly** for commit + push approval — NEVER auto-commit or auto-push
+   - Resolve conflicts against latest main before push
+   - If user rejects: keep files staged, do NOT unstage
 9. **NEVER log secrets** — passwords, tokens, API keys, JWT secrets must never appear in logs
-10. If user rejects a commit: keep files staged, do NOT unstage
 
 ### Environment
 - **OS**: Windows 10 (dev), must support Linux/Mac

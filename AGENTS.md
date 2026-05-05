@@ -4,6 +4,19 @@
 
 > **CRITICAL**: These rules govern ALL development activities. Violations must be self-corrected immediately.
 
+### Git Branch Workflow
+
+> **MANDATORY**: ALL work MUST happen on a feature branch. Never work on main directly.
+
+**Mandatory Workflow:**
+1. Always start from `git checkout main && git pull origin main`
+2. Create feature branch: `git checkout -b feature/<name>`
+3. All implementation and testing on the feature branch ONLY
+4. Verify ALL tests pass before asking for approval
+5. **Always ask user explicitly** for commit + push approval — NEVER auto-commit or auto-push
+6. Resolve conflicts against latest main before push
+7. If user rejects: keep files staged, do NOT unstage
+
 ### Commit & Push Safety
 
 > **NEVER commit or push without explicit user approval.** This is the highest-priority rule.
@@ -16,7 +29,7 @@
 5. Changes reviewed by user before commit
 
 **Workflow:**
-1. Make all changes and `git add` them
+1. Make all changes on the feature branch and `git add` them
 2. Run `git status` and `git diff --staged` to show user what will be committed
 3. **Ask user for approval** before running `git commit`
 4. If user rejects: keep files staged, do NOT unstage
