@@ -14,6 +14,7 @@ class TelegramService:
     def __init__(self, bot_token: Optional[str] = None, chat_id: Optional[str] = None):
         self._bot_token = bot_token
         self._chat_id = chat_id
+        self.enabled_events = []
 
     @property
     def is_configured(self) -> bool:
@@ -27,7 +28,9 @@ class TelegramService:
             return cls()
         try:
             token = decrypt_value(config.bot_token_encrypted)
-            return cls(bot_token=token, chat_id=config.chat_id)
+            instance = cls(bot_token=token, chat_id=config.chat_id)
+            instance.enabled_events = config.event_types or []
+            return instance
         except Exception as e:
             logger.error(f"Failed to decrypt Telegram token: {e}")
             return cls()
