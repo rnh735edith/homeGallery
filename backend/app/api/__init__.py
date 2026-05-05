@@ -18,6 +18,7 @@ from app.api.analysis import router as analysis_router
 from app.api.visual_search import router as visual_search_router
 from app.api.api_keys import router as api_keys_router
 from app.api.contact import router as contact_router
+from app.api.notifications import router as notifications_router
 
 api_router = APIRouter(prefix="/api")
 
@@ -39,5 +40,6 @@ api_router.include_router(analysis_router)
 api_router.include_router(visual_search_router)
 api_router.include_router(api_keys_router)
 api_router.include_router(contact_router)
+api_router.include_router(notifications_router)
 
 __all__ = ["api_router"]
