@@ -4,6 +4,13 @@ import AgentCard from "../components/Settings/AgentCard";
 import useAgentStore from "../stores/agentStore";
 import SettingSection from "../components/Settings/SettingSection";
 
+const API_PROVIDERS = [
+  { value: "openai", label: "OpenAI (ChatGPT)" },
+  { value: "gemini", label: "Google Gemini" },
+  { value: "openrouter", label: "OpenRouter" },
+  { value: "anthropic", label: "Anthropic (Claude)" },
+];
+
 export default function SettingsPage() {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,6 +38,17 @@ export default function SettingsPage() {
   const [restoreLoading, setRestoreLoading] = useState(false);
   const [wipeConfirm, setWipeConfirm] = useState("");
   const [wipeType, setWipeType] = useState("");
+  const [apiKeys, setApiKeys] = useState([]);
+  const [apiKeysLoading, setApiKeysLoading] = useState(false);
+  const [showAddKey, setShowAddKey] = useState(false);
+  const [newKey, setNewKey] = useState({
+    provider: "openai",
+    name: "",
+    key: "",
+  });
+  const [editingKey, setEditingKey] = useState(null);
+  const [contactMessages, setContactMessages] = useState([]);
+  const [contactLoading, setContactLoading] = useState(false);
 
   const fetchAgents = useAgentStore((state) => state.fetchAgents);
   const agents = useAgentStore((state) => state.agents);
@@ -45,6 +63,12 @@ export default function SettingsPage() {
   useEffect(() => {
     if (activeTab === "agents") {
       fetchAgents();
+    }
+    if (activeTab === "api-keys") {
+      loadApiKeys();
+    }
+    if (activeTab === "messages") {
+      loadContactMessages();
     }
   }, [activeTab]);
 
@@ -258,6 +282,88 @@ export default function SettingsPage() {
     }
   };
 
+  const loadApiKeys = async () => {
+    setApiKeysLoading(true);
+    try {
+      const res = await api.apiKeys.list();
+      setApiKeys(res.data);
+    } catch (err) {
+      console.error("Failed to load API keys", err);
+    } finally {
+      setApiKeysLoading(false);
+    }
+  };
+
+  const handleAddApiKey = async () => {
+    if (!newKey.name || !newKey.key) {
+      setError("Name and key are required");
+      return;
+    }
+    try {
+      await api.apiKeys.create(newKey);
+      setMessage("API key added");
+      setNewKey({ provider: "openai", name: "", key: "" });
+      setShowAddKey(false);
+      loadApiKeys();
+    } catch (err) {
+      setError(err.response?.data?.detail || "Failed to add API key");
+    }
+  };
+
+  const handleDeleteApiKey = async (id, name) => {
+    if (!window.confirm(`Delete API key "${name}"?`)) return;
+    try {
+      await api.apiKeys.delete(id);
+      setMessage("API key deleted");
+      loadApiKeys();
+    } catch (err) {
+      setError(err.response?.data?.detail || "Failed to delete API key");
+    }
+  };
+
+  const handleToggleKeyActive = async (key) => {
+    try {
+      await api.apiKeys.update(key.id, { is_active: !key.is_active });
+      setMessage(`API key ${key.is_active ? "disabled" : "enabled"}`);
+      loadApiKeys();
+    } catch (err) {
+      setError(err.response?.data?.detail || "Failed to update API key");
+    }
+  };
+
+  const loadContactMessages = async () => {
+    setContactLoading(true);
+    try {
+      const res = await api.get("/contact/messages");
+      setContactMessages(res.data);
+    } catch (err) {
+      console.error("Failed to load contact messages", err);
+    } finally {
+      setContactLoading(false);
+    }
+  };
+
+  const handleMarkRead = async (id) => {
+    try {
+      await api.put(`/contact/messages/${id}/read`);
+      setMessage("Message marked as read");
+      loadContactMessages();
+    } catch (err) {
+      setError(err.response?.data?.detail || "Failed to update message");
+    }
+  };
+
+  const handleDeleteMessage = async (id, name) => {
+    if (!window.confirm(`Delete message from "${name}"?`)) return;
+    try {
+      await api.delete(`/contact/messages/${id}`);
+      setMessage("Message deleted");
+      loadContactMessages();
+    } catch (err) {
+      setError(err.response?.data?.detail || "Failed to delete message");
+    }
+  };
+
   const downloadBlob = (blob, filename) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -276,6 +382,8 @@ export default function SettingsPage() {
     { id: "backup", label: "Backup & Restore" },
     { id: "wipe", label: "Wipe Data" },
     { id: "agents", label: "Agents" },
+    { id: "api-keys", label: "API Keys" },
+    { id: "messages", label: "Messages" },
   ];
 
   if (loading) return <div className="loading-screen">Loading settings...</div>;
@@ -799,6 +907,179 @@ export default function SettingsPage() {
                     No agents registered yet. Agents will appear as they are
                     implemented.
                   </p>
+                </div>
+              )}
+            </div>
+          </SettingSection>
+        </div>
+      )}
+
+      {activeTab === "api-keys" && (
+        <div className="settings-section">
+          <SettingSection title="AI Provider API Keys">
+            <p className="subtitle">
+              Add API keys for external AI providers to enable cloud-based
+              analysis. Keys are encrypted before storage. Agents that use cloud
+              APIs will only activate when a key is configured.
+            </p>
+
+            <div className="api-keys-header">
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => setShowAddKey(!showAddKey)}
+              >
+                {showAddKey ? "Cancel" : "+ Add API Key"}
+              </button>
+            </div>
+
+            {showAddKey && (
+              <div className="api-key-form">
+                <div className="form-group">
+                  <label>Provider</label>
+                  <select
+                    value={newKey.provider}
+                    onChange={(e) =>
+                      setNewKey({ ...newKey, provider: e.target.value })
+                    }
+                  >
+                    {API_PROVIDERS.map((p) => (
+                      <option key={p.value} value={p.value}>
+                        {p.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Primary OpenAI Key"
+                    value={newKey.name}
+                    onChange={(e) =>
+                      setNewKey({ ...newKey, name: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="form-group">
+                  <label>API Key</label>
+                  <input
+                    type="password"
+                    placeholder="sk-..."
+                    value={newKey.key}
+                    onChange={(e) =>
+                      setNewKey({ ...newKey, key: e.target.value })
+                    }
+                  />
+                </div>
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={handleAddApiKey}
+                >
+                  Save Key
+                </button>
+              </div>
+            )}
+
+            {apiKeysLoading && <div className="loading">Loading keys...</div>}
+
+            <div className="api-keys-list">
+              {apiKeys.map((key) => (
+                <div key={key.id} className="api-key-item">
+                  <div className="api-key-info">
+                    <span className="api-key-provider">{key.provider}</span>
+                    <span className="api-key-name">{key.name}</span>
+                    <span className="api-key-masked">{key.key_masked}</span>
+                  </div>
+                  <div className="api-key-actions">
+                    <span
+                      className={`api-key-status ${key.is_active ? "active" : "inactive"}`}
+                    >
+                      {key.is_active ? "Active" : "Disabled"}
+                    </span>
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => handleToggleKeyActive(key)}
+                    >
+                      {key.is_active ? "Disable" : "Enable"}
+                    </button>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleDeleteApiKey(key.id, key.name)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {apiKeys.length === 0 && !apiKeysLoading && (
+                <div className="empty-api-keys">
+                  <p>
+                    No API keys configured. Add a key to enable cloud-based AI
+                    analysis.
+                  </p>
+                </div>
+              )}
+            </div>
+          </SettingSection>
+        </div>
+      )}
+
+      {activeTab === "messages" && (
+        <div className="settings-section">
+          <SettingSection title="Contact Messages">
+            <p className="subtitle">
+              Messages submitted through the contact form.
+            </p>
+
+            {contactLoading && (
+              <div className="loading">Loading messages...</div>
+            )}
+
+            <div className="messages-list">
+              {contactMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`message-item ${msg.is_read ? "read" : "unread"}`}
+                >
+                  <div className="message-header">
+                    <div className="message-sender">
+                      <span className="message-name">{msg.name}</span>
+                      <span className="message-email">{msg.email}</span>
+                    </div>
+                    <div className="message-meta">
+                      <span className="message-date">
+                        {new Date(msg.created_at).toLocaleDateString()}
+                      </span>
+                      {!msg.is_read && (
+                        <span className="message-badge">New</span>
+                      )}
+                    </div>
+                  </div>
+                  {msg.subject && (
+                    <div className="message-subject">{msg.subject}</div>
+                  )}
+                  <div className="message-body">{msg.message}</div>
+                  <div className="message-actions">
+                    {!msg.is_read && (
+                      <button
+                        className="btn btn-sm"
+                        onClick={() => handleMarkRead(msg.id)}
+                      >
+                        Mark Read
+                      </button>
+                    )}
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleDeleteMessage(msg.id, msg.name)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {contactMessages.length === 0 && !contactLoading && (
+                <div className="empty-messages">
+                  <p>No messages received yet.</p>
                 </div>
               )}
             </div>

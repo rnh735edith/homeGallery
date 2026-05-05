@@ -14,6 +14,8 @@ import AlbumDetailPage from "./pages/AlbumDetailPage";
 import EditorPage from "./pages/EditorPage";
 import FacesPage from "./pages/FacesPage";
 import DuplicatesPage from "./pages/DuplicatesPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
@@ -162,6 +164,8 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>

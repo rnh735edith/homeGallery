@@ -11,6 +11,8 @@ export const useGalleryStore = create((set, get) => ({
   filters: {},
   photoMetadatas: {},
   loadingMetadata: false,
+  analysisData: {},
+  enhancedPhotos: new Set(),
 
   fetchPhotos: async (params = {}) => {
     set({ loading: true });
@@ -130,5 +132,31 @@ export const useGalleryStore = create((set, get) => ({
 
   clearPhotoMetadata: () => {
     set({ photoMetadatas: {}, loadingMetadata: false });
+  },
+
+  fetchAnalysis: async (photoId) => {
+    const { analysisData } = get();
+    if (analysisData[photoId]) return analysisData[photoId];
+
+    try {
+      const response = await api.analysis.getAnalysis(photoId);
+      set((state) => ({
+        analysisData: { ...state.analysisData, [photoId]: response.data },
+      }));
+      return response.data;
+    } catch (err) {
+      console.error(`Failed to fetch analysis for photo ${photoId}:`, err);
+      return null;
+    }
+  },
+
+  markAsEnhanced: (photoId) => {
+    set((state) => ({
+      enhancedPhotos: new Set([...state.enhancedPhotos, photoId]),
+    }));
+  },
+
+  isEnhanced: (photoId) => {
+    return get().enhancedPhotos.has(photoId);
   },
 }));

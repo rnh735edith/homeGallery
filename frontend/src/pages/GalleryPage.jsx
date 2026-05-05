@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGalleryStore } from "../store/galleryStore";
 import MetadataBadge from "../components/Gallery/MetadataBadge";
+import QualityBadge from "../components/Gallery/QualityBadge";
+import EnhanceButton from "../components/Gallery/EnhanceButton";
 import PhotoMetadataPanel from "../components/Gallery/PhotoMetadataPanel";
 
 export default function GalleryPage() {
@@ -315,6 +317,15 @@ export default function GalleryPage() {
               {photoMetadatas[photo.id] && (
                 <MetadataBadge metadata={photoMetadatas[photo.id]} compact />
               )}
+              {photoMetadatas[photo.id]?.quality_score !== null &&
+                photoMetadatas[photo.id]?.quality_score !== undefined && (
+                  <QualityBadge
+                    score={photoMetadatas[photo.id].quality_score}
+                  />
+                )}
+              {get().isEnhanced(photo.id) && (
+                <div className="enhanced-indicator">✨ Enhanced</div>
+              )}
               <div className="photo-overlay">
                 <button
                   className={`favorite-btn ${photo.favorite ? "active" : ""}`}
@@ -325,6 +336,13 @@ export default function GalleryPage() {
                 >
                   {photo.favorite ? "\u2605" : "\u2606"}
                 </button>
+                <EnhanceButton
+                  photoId={photo.id}
+                  onEnhanced={() => {
+                    const { markAsEnhanced } = get();
+                    markAsEnhanced(photo.id);
+                  }}
+                />
               </div>
             </div>
           ))}

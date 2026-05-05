@@ -72,9 +72,15 @@ class PhotoMetadataResponse(BaseModel):
     quality_score: Optional[float] = None
     sharpness: Optional[float] = None
     brightness: Optional[float] = None
+    noise_level: Optional[float] = None
     composition_score: Optional[float] = None
+    rule_of_thirds_score: Optional[float] = None
+    symmetry_score: Optional[float] = None
+    leading_lines_score: Optional[float] = None
     scene_type: Optional[str] = None
     is_duplicate: bool = False
+    is_best_shot: bool = False
+    enhanced_path: Optional[str] = None
     processed_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}

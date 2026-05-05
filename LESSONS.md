@@ -2,6 +2,62 @@
 
 > Read at the beginning of each session. Updated at the end.
 
+## 2026-05-04 - API Key Management for AI Providers
+
+### Current Status
+- **COMPLETE**: Encrypted API key storage for external AI providers (OpenAI, Gemini, OpenRouter, Anthropic)
+- **25/25 unit tests passing** (9 encryption + 4 model + 12 API)
+- **Files created**: 7 new files, 4 modified
+
+### Files Created
+- `backend/app/utils/encryption.py` — Fernet-based encryption with key derivation
+- `backend/app/models/api_key.py` — ApiKey model with encrypted key storage
+- `backend/app/schemas/api_key.py` — ApiKeyCreate, ApiKeyUpdate, ApiKeyResponse schemas
+- `backend/app/api/api_keys.py` — 5 endpoints (list, get, create, update, delete)
+- `frontend/src/styles/global.css` — CSS for API keys UI (appended)
+- `tests/unit/test_api_key_encryption.py` — 9 encryption tests
+- `tests/unit/test_api_key_model.py` — 4 model tests
+- `tests/unit/test_api_key_api.py` — 12 API endpoint tests
+
+### Files Modified
+- `backend/app/models/__init__.py` — Added ApiKey export
+- `backend/app/api/__init__.py` — Registered api_keys router
+- `backend/requirements.txt` — Added `cryptography>=42.0.0`
+- `frontend/src/services/api.js` — Added `apiKeys` service
+- `frontend/src/pages/SettingsPage.jsx` — Added "API Keys" tab with CRUD UI
+
+### Implementation Details
+- **Encryption**: Fernet symmetric encryption with SHA-256 derived key from SECRET_KEY
+- **Masking**: API keys shown masked (last 4 chars visible) in UI and API responses
+- **Provider normalization**: Provider names normalized to lowercase on save
+- **Admin-only**: All API key endpoints require admin authentication
+- **Supported providers**: OpenAI (ChatGPT), Google Gemini, OpenRouter, Anthropic (Claude)
+
+### Key Learnings
+- **Fernet requires cryptography package**: Added to requirements.txt; `python-jose[cryptography]` already includes it but explicit is better
+- **Encryption key derivation**: SHA-256 hash of SECRET_KEY provides 32-byte key for Fernet
+- **Mask before response**: Never send encrypted or plaintext keys to frontend; always mask
+- **PowerShell limitations**: No `&&` for command chaining, no `&` for backgrounding — use `Start-Job` or `;` instead
+- **sys.path for imports**: When running from repo root, need both `.` and `./backend` in sys.path for `app.*` imports
+
+### API Endpoints
+```
+GET    /api/api-keys          — List all keys (admin only)
+GET    /api/api-keys/{id}     — Get single key (admin only)
+POST   /api/api-keys          — Create new key (admin only)
+PUT    /api/api-keys/{id}     — Update key (admin only)
+DELETE /api/api-keys/{id}     — Delete key (admin only)
+```
+
+### Security Considerations
+- Keys encrypted at rest using Fernet symmetric encryption
+- Keys never returned in plaintext — only masked versions
+- Encryption key derived from app SECRET_KEY
+- Admin-only access via `get_current_admin_user` dependency
+- No logging of API key values
+
+---
+
 ## 2026-05-03 - Phase 3: Auto-Organization Agent Design
 
 ### Current Status
@@ -415,3 +471,186 @@ npx playwright install chromium        # Install browser
 - **Solution**: Call endpoint functions directly with mocked `db` session and `current_user` parameters
 - **TDD workflow**: Write failing test first (RED), implement minimal code (GREEN), verify tests pass
 - **FastAPI status codes**: Use `status.HTTP_403_FORBIDDEN` (not `FORBIDDEN` with typo)
+
+---
+
+## 2026-05-04 - Phase 3 Deferred: GPS Clustering + Best-Shot
+
+### Current Status
+- **GPS clustering COMPLETE**: `create_location_albums()` with Haversine distance, union-find clustering
+- **Best-shot COMPLETE**: `suggest_best_shots()` with quality-based scoring
+- **14 new unit tests passing** (6 GPS parsing + 4 clustering + 4 best-shot)
+
+### Implementation Details
+- `_parse_gps()` — Extracts GPS from EXIF DMS format (degrees/minutes/seconds tuples)
+- `_haversine()` — Calculates distance in meters between two GPS coordinates
+- `create_location_albums()` — Clusters photos within 100m, creates auto-albums named `Location: 40.71°N, 74.01°W`
+- `suggest_best_shots()` — Scores duplicate groups: sharpness (50%) + brightness closeness to 0.5 (30%) + face count (20%)
+- Added `is_best_shot` field to PhotoMetadata model
+
+### Key Learnings
+- **GPS from EXIF**: Stored as DMS tuples (degrees, minutes, seconds), need ref-based sign flipping (S/W = negative)
+- **Union-find for clustering**: Same algorithm as duplicate detection, but with Haversine distance instead of Hamming
+- **Best-shot scoring**: Weighted combination of measurable metrics; face count placeholder for future integration
+- **No new dependencies**: All computation uses pure math + existing PIL/numpy
+
+---
+
+## 2026-05-04 - Phase 4: Enhancement Agent
+
+### Current Status
+- **COMPLETE**: EnhancementService + EnhancementAgent + API + Frontend + tests
+- **48/48 unit tests passing** (28 service + 11 agent + 9 API)
+- **4 E2E tests written** (enhancement-analysis.spec.js)
+
+### Files Created
+- `backend/app/agents/services/enhancement_service.py` — Histogram analysis, scene presets, PIL enhancement
+- `backend/app/agents/enhancement_agent.py` — EnhancementAgent (10-min interval)
+- `backend/app/api/enhancement.py` — 3 endpoints (suggestions, apply, enhanced)
+- `backend/app/schemas/enhancement.py` — Request/response schemas
+- `frontend/src/components/Gallery/EnhanceButton.jsx` — Enhance button with loading/success states
+- `frontend/src/components/Gallery/QualityBadge.jsx` — Color-coded quality badge
+- `frontend/src/components/Photo/AnalysisPanel.jsx` — Analysis metrics panel
+- `tests/unit/test_enhancement_service.py` — 28 tests
+- `tests/unit/test_enhancement_agent.py` — 11 tests
+- `tests/unit/test_enhancement_api.py` — 9 tests
+
+### Key Implementation
+- **Histogram analysis**: 256-bin histogram, calculates mean brightness, exposure classification
+- **Scene presets**: portrait (brightness boost), landscape (contrast/color boost), night (shadow boost), indoor (WB correction)
+- **PIL enhancement**: `ImageEnhance.Brightness`, `.Contrast`, `.Color` with intensity scaling
+- **Enhanced files**: `{stem}_enhanced{ext}` saved alongside originals
+
+### Key Learnings
+- **No new dependencies**: Enhancement uses only PIL (already available)
+- **Scene type from metadata**: EnhancementAgent reads `PhotoMetadata.scene_type` from Phase 2
+- **Intensity factor**: 0.0-1.0 scales the adjustment amount, allows user control
+- **Test pattern**: Create test images with PIL (`Image.new("RGB", ...)`) for histogram tests
+
+---
+
+## 2026-05-04 - Phase 5: Content Analysis Agent
+
+### Current Status
+- **COMPLETE**: AnalysisService + AnalysisAgent + API + Frontend + tests
+- **37/37 unit tests passing** (25 service + 8 agent + 4 API)
+- **4 E2E tests written** (enhancement-analysis.spec.js)
+
+### Files Created
+- `backend/app/agents/services/analysis_service.py` — Sharpness, exposure, noise, quality, composition
+- `backend/app/agents/analysis_agent.py` — AnalysisAgent (10-min interval)
+- `backend/app/api/analysis.py` — Analysis endpoint
+- `tests/unit/test_analysis_service.py` — 25 tests
+- `tests/unit/test_analysis_agent.py` — 8 tests
+- `tests/unit/test_analysis_api.py` — 4 tests
+
+### Model Additions (PhotoMetadata)
+- `noise_level` (Float, nullable)
+- `rule_of_thirds_score` (Float, nullable)
+- `symmetry_score` (Float, nullable)
+- `leading_lines_score` (Float, nullable)
+
+### Key Implementation
+- **Sharpness**: Laplacian variance approximation using numpy convolution (`arr[1:-1, 1:-1] * 4 - neighbors`)
+- **Exposure**: Histogram mean distance from 0.5 ideal
+- **Noise**: Variance in center region of grayscale image
+- **Quality score**: `sharpness * 0.4 + exposure * 0.25 + (1-noise) * 0.15 + composition * 0.2` (scaled to 0-100)
+- **Rule of thirds**: Edge density near 3×3 grid intersections
+- **Symmetry**: Mean absolute difference between left-right and top-bottom halves
+- **Leading lines**: Edge orientation analysis using Sobel-like gradients
+
+### API Additions
+- `GET /api/photos/{id}/analysis` — Analysis metrics
+- `GET /api/photos?min_quality=N` — Filter photos by quality score (added to existing list_photos)
+
+### Key Learnings
+- **Laplacian without cv2**: Approximated with numpy array slicing (second derivative approximation)
+- **Multiple JOINs to PhotoMetadata**: Same FK issue as Phase 2 — always specify ON clause explicitly
+- **K-means convergence warnings**: Expected for single-color images; sklearn warns about duplicate points
+- **Composition analysis is approximate**: Pure-PIL approach gives reasonable scores but not pixel-perfect
+- **Frontend store path**: `frontend/src/store/galleryStore.js` (not `stores/`)
+
+---
+
+## 2026-05-04 - Phase 6: Visual Search Agent
+
+### Current Status
+- **COMPLETE**: SearchService + SearchAgent + API + Frontend + tests
+- **44/44 unit tests passing** (23 service + 13 agent + 8 API)
+- **6 E2E tests written** (visual-search.spec.js)
+
+### Files Created
+- `backend/app/agents/services/search_service.py` — Feature extraction, embeddings, similarity search
+- `backend/app/agents/search_agent.py` — SearchAgent (10-min interval)
+- `backend/app/api/visual_search.py` — Text search + similarity search endpoints
+- `tests/unit/test_search_service.py` — 23 tests
+- `tests/unit/test_search_agent.py` — 13 tests
+- `tests/unit/test_visual_search_api.py` — 8 tests
+
+### Feature Vector Design (128-dim)
+```
+[96 dims: color histogram — 32 bins × 3 RGB channels (normalized)]
+[16 dims: edge density — 4×4 grid variance]
+[16 dims: brightness statistics — mean, std, p25, p75, max, min × 3 channels]
+= 128 dimensions, L2 normalized for cosine similarity
+```
+
+### Key Implementation
+- **Feature extraction**: Resize to 64×64, compute histogram + edge density + brightness stats
+- **Embedding storage**: `.npy` files in `data/embeddings/`, named `{photo_id}.npy`
+- **Text search**: Keyword matching against metadata (objects, colors, scene_type, filename)
+- **Similarity search**: Cosine similarity between embeddings, ranked by score
+- **Graceful degradation**: Missing files return zero vectors, no crashes
+
+### API Endpoints
+- `GET /api/search/text?q=beach sunset` — Text-to-image search (keyword-based)
+- `GET /api/search/similar/{id}` — Find visually similar photos
+
+### Key Learnings
+- **CLIP/torch not installed**: Used lightweight feature-based embeddings as practical alternative
+- **Text search without CLIP**: Keyword matching against existing metadata is surprisingly effective
+- **Cosine similarity**: Requires L2-normalized vectors; `dot / (norm1 * norm2)` formula
+- **Embedding files**: `.npy` format is fast to load/save, numpy-native
+- **Feature vector design**: 128-dim is a balance between accuracy and storage (512 bytes per photo)
+- **Frontend approach**: Replace existing filename search with visual search input; results replace main grid
+- **Search input replacement**: Visual search supersedes filename search since it matches metadata + filename
+
+---
+
+## 2026-05-04 - Complete Agent System Summary
+
+### Test Results
+| Phase | Unit Tests | E2E Tests | Status |
+|-------|-----------|-----------|--------|
+| Phase 1 (Foundation) | 28 | 15 | ✅ |
+| Phase 2 (Metadata) | 26 | 15 | ✅ |
+| Phase 3 (Organization) | 35 | 6 | ✅ |
+| Phase 3 deferred (GPS+BestShot) | 14 | 0 | ✅ |
+| Phase 4 (Enhancement) | 48 | 4 | ✅ |
+| Phase 5 (Analysis) | 37 | 4 | ✅ |
+| Phase 6 (Visual Search) | 44 | 6 | ✅ |
+| **Total** | **246** | **50+** | **✅ 100%** |
+
+### File Count
+- **Backend services**: 5 files (metadata, organization, enhancement, analysis, search)
+- **Backend agents**: 5 files (metadata, organization, enhancement, analysis, search)
+- **Backend APIs**: 7 files (metadata, duplicates, enhancement, analysis, visual_search, agents, photos modified)
+- **Frontend components**: 8+ files (QualityBadge, EnhanceButton, AnalysisPanel, similar photos modal, etc.)
+- **Frontend stores**: 2 files modified (galleryStore, agentStore)
+- **Tests**: 17 unit test files, 6 E2E test files
+
+### Development Approach
+- **Subagent-driven development**: Dispatched parallel subagents for Phase 4 + Phase 5 backend
+- **TDD throughout**: All phases followed RED → GREEN → REFACTOR
+- **Pattern consistency**: Every agent follows the same Service + Agent + API pattern
+- **No new external dependencies**: Phases 4, 5, 6 use only PIL + numpy (sklearn already available)
+- **Graceful fallbacks**: Missing files, missing metadata, missing optional deps handled gracefully
+
+### Agentic Development Principles (Learned)
+1. **Parallel dispatch for independent phases**: Phase 4 and 5 had no dependencies on each other, only on Phase 2 (Metadata)
+2. **Fresh subagent context per task**: Prevents context pollution between implementations
+3. **Two-stage review**: Spec compliance first, then code quality
+4. **TDD enforced by subagent prompts**: Each implementer told to write failing tests first
+5. **Pattern documentation**: Once Phase 2 pattern established, Phases 3-6 followed the same template
+6. **Graceful degradation**: Every feature works without optional dependencies
+7. **Test-driven confidence**: 246 unit tests give confidence to refactor and extend

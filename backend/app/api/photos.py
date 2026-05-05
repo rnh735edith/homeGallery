@@ -95,6 +95,7 @@ def list_photos(
     q: Optional[str] = Query(None, description="Search by filename"),
     tag: Optional[str] = Query(None, description="Search by metadata tag"),
     color: Optional[str] = Query(None, description="Search by dominant color"),
+    min_quality: Optional[float] = Query(None, ge=0, le=100, description="Minimum quality score (0-100)"),
     favorite: Optional[bool] = None,
     sort_by: str = Query("uploaded_at", pattern="^(uploaded_at|taken_at|filename)$"),
     sort_order: str = Query("desc", pattern="^(asc|desc)$"),
@@ -106,23 +107,33 @@ def list_photos(
     if q:
         query = query.filter(Photo.filename.ilike(f"%{q}%"))
 
+    # Track if we've already joined PhotoMetadata
+    joined_metadata = False
+
     if tag:
         from app.models.photo_metadata import PhotoMetadata
         tag_filter = f"%{tag.lower()}%"
-        # Specify the join condition explicitly to avoid ambiguous foreign key
-        query = query.join(PhotoMetadata, Photo.id == PhotoMetadata.photo_id).filter(
-            PhotoMetadata.objects.ilike(tag_filter)
-        )
+        if not joined_metadata:
+            query = query.join(PhotoMetadata, Photo.id == PhotoMetadata.photo_id)
+            joined_metadata = True
+        query = query.filter(PhotoMetadata.objects.ilike(tag_filter))
 
     if color:
         from app.models.photo_metadata import PhotoMetadata
         # Normalize color format - handle both with and without # prefix
         color_upper = color.upper() if not color.startswith("#") else color[1:].upper()
         color_filter = f"%{color_upper}%"
-        # Specify the join condition explicitly to avoid ambiguous foreign key
-        query = query.join(PhotoMetadata, Photo.id == PhotoMetadata.photo_id).filter(
-            PhotoMetadata.colors.like(color_filter)
-        )
+        if not joined_metadata:
+            query = query.join(PhotoMetadata, Photo.id == PhotoMetadata.photo_id)
+            joined_metadata = True
+        query = query.filter(PhotoMetadata.colors.like(color_filter))
+
+    if min_quality is not None:
+        from app.models.photo_metadata import PhotoMetadata
+        if not joined_metadata:
+            query = query.join(PhotoMetadata, Photo.id == PhotoMetadata.photo_id)
+            joined_metadata = True
+        query = query.filter(PhotoMetadata.quality_score >= min_quality)
 
     if favorite is not None:
         query = query.filter(Photo.favorite == favorite)

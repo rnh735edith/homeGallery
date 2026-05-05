@@ -15,6 +15,9 @@ from app.workers.thumbnail_worker import ThumbnailWorker
 from app.agents.orchestrator import AgentOrchestrator
 from app.agents.metadata_agent import MetadataAgent
 from app.agents.organization_agent import OrganizationAgent
+from app.agents.enhancement_agent import EnhancementAgent
+from app.agents.analysis_agent import AnalysisAgent
+from app.agents.search_agent import SearchAgent
 import app.api.agents as agents_api
 
 setup_logging()
@@ -66,6 +69,12 @@ async def lifespan(app: FastAPI):
     orchestrator.register(metadata_agent)
     organization_agent = OrganizationAgent(settings)
     orchestrator.register(organization_agent)
+    enhancement_agent = EnhancementAgent(settings)
+    orchestrator.register(enhancement_agent)
+    analysis_agent = AnalysisAgent(settings)
+    orchestrator.register(analysis_agent)
+    search_agent = SearchAgent(settings)
+    orchestrator.register(search_agent)
     agents_api.orchestrator = orchestrator
     orchestrator.start_all()
     logger.info("Agent orchestrator started")

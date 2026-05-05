@@ -1,0 +1,203 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "build",
+
+  "shell": "pwsh",
+
+  "autoupdate": true,
+
+  "snapshot": true,
+
+  "share": "manual",
+
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "reserved": 10000
+  },
+
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      "dist/**",
+      ".git/**",
+      "data/**",
+      "test-results/**",
+      "*.db",
+      "*.pyc",
+      "__pycache__/**"
+    ]
+  },
+
+  "permission": {
+    "bash": "ask",
+    "edit": "allow",
+    "write": "allow",
+    "webfetch": "allow",
+    "websearch": "allow"
+  },
+
+  "formatter": {
+    "prettier": {
+      "command": ["npx", "prettier", "--write", "$FILE"],
+      "environment": {
+        "NODE_ENV": "development"
+      },
+      "extensions": [".js", ".ts", ".jsx", ".tsx", ".css", ".html", ".json"]
+    },
+    "ruff": {
+      "command": ["ruff", "format", "$FILE"],
+      "extensions": [".py"]
+    }
+  },
+
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp@latest"],
+      "enabled": true
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp",
+      "enabled": true
+    },
+    "memory": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
+      "enabled": true
+    },
+    "git": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-git"],
+      "enabled": true,
+      "environment": {
+        "GIT_ALLOW_PROTOCOL": "https"
+      }
+    },
+    "sequential-thinking": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "enabled": true
+    },
+    "filesystem": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "."],
+      "enabled": true
+    }
+  },
+
+  "agent": {
+    "build": {
+      "mode": "primary",
+      "description": "Default agent for full development work with all tools enabled",
+      "permission": {
+        "edit": "allow",
+        "bash": "ask",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "todowrite": "allow"
+      }
+    },
+    "plan": {
+      "mode": "primary",
+      "description": "Analysis and planning agent - read-only access, no file modifications",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "webfetch": "allow"
+      }
+    },
+    "e2e-tester": {
+      "mode": "subagent",
+      "description": "Runs and fixes Playwright E2E tests. Use for test debugging, running test suites, and fixing failing tests.",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "playwright_*": "allow"
+      }
+    },
+    "backend-dev": {
+      "mode": "subagent",
+      "description": "Python/FastAPI backend development. Use for API endpoints, database models, services, and backend logic.",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    },
+    "frontend-dev": {
+      "mode": "subagent",
+      "description": "React/Vite frontend development. Use for components, pages, stores, and UI logic.",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    },
+    "security-auditor": {
+      "mode": "subagent",
+      "description": "Security review of code changes. Checks for auth bypass, injection, path traversal, and credential leaks.",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    }
+  },
+
+  "command": {
+    "test": {
+      "template": "Run the full E2E test suite with Playwright and report results. Fix any failing tests.\nnpx playwright test --reporter=list",
+      "description": "Run E2E tests and fix failures",
+      "agent": "e2e-tester"
+    },
+    "lint": {
+      "template": "Run linters on both backend (ruff) and frontend (prettier/biome). Fix any issues found.",
+      "description": "Lint and format code",
+      "agent": "build"
+    },
+    "build": {
+      "template": "Build the frontend for production and verify the server starts correctly.\ncd frontend && npm run build",
+      "description": "Build frontend for production",
+      "agent": "frontend-dev"
+    },
+    "start": {
+      "template": "Start the HomeGallery server. Use python manage.py start to launch in background.",
+      "description": "Start the dev server",
+      "agent": "build"
+    }
+  },
+
+  "plugin": [
+    "opencode-helicone-session",
+    "opencode-wakatime",
+    "superpowers@git+https://github.com/obra/superpowers.git"
+  ],
+
+  "instructions": ["AGENTS.md", "LESSONS.md", "MEMORY.md"]
+}

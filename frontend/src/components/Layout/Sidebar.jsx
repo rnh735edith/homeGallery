@@ -9,6 +9,11 @@ const navItems = [
   { path: "/settings", label: "Settings", icon: "\u2699" },
 ];
 
+const footerItems = [
+  { path: "/about", label: "About", icon: "\u2139" },
+  { path: "/contact", label: "Contact", icon: "\u2709" },
+];
+
 export default function Sidebar() {
   return (
     <aside className="sidebar">
@@ -30,6 +35,20 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+      <div className="sidebar-footer">
+        {footerItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `sidebar-link sidebar-footer-link ${isActive ? "active" : ""}`
+            }
+          >
+            <span className="sidebar-icon">{item.icon}</span>
+            <span className="sidebar-label">{item.label}</span>
+          </NavLink>
+        ))}
+      </div>
     </aside>
   );
 }

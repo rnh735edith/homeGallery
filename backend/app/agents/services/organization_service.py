@@ -1,7 +1,8 @@
 import os
+import math
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
@@ -207,4 +208,193 @@ class OrganizationService:
             "photos_scanned": len(photos),
             "duplicate_groups": duplicate_groups,
             "duplicates_marked": duplicates_marked,
+        }
+
+    def _parse_gps(self, exif_data: dict) -> tuple[Optional[float], Optional[float]]:
+        """Parse GPS coordinates from EXIF data. Returns (lat, lon) in decimal degrees."""
+        try:
+            lat_ref = exif_data.get("GPSLatitudeRef", "")
+            lon_ref = exif_data.get("GPSLongitudeRef", "")
+            lat_dms = exif_data.get("GPSLatitude")
+            lon_dms = exif_data.get("GPSLongitude")
+
+            if not lat_dms or not lon_dms:
+                return (None, None)
+
+            lat = self._dms_to_decimal(lat_dms)
+            lon = self._dms_to_decimal(lon_dms)
+
+            if lat is None or lon is None:
+                return (None, None)
+
+            if lat_ref == "S":
+                lat = -lat
+            if lon_ref == "W":
+                lon = -lon
+
+            return (lat, lon)
+        except Exception as e:
+            logger.warning(f"GPS parsing failed: {e}")
+            return (None, None)
+
+    def _dms_to_decimal(self, dms) -> Optional[float]:
+        """Convert DMS (degrees, minutes, seconds) to decimal degrees."""
+        try:
+            if isinstance(dms, (list, tuple)) and len(dms) >= 3:
+                degrees = float(dms[0])
+                minutes = float(dms[1])
+                seconds = float(dms[2])
+                return degrees + minutes / 60 + seconds / 3600
+            return None
+        except (ValueError, TypeError, IndexError):
+            return None
+
+    def _haversine(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+        """Calculate distance in meters between two GPS coordinates using Haversine formula."""
+        R = 6371000  # Earth's radius in meters
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = (math.sin(dlat / 2) ** 2 +
+             math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+             math.sin(dlon / 2) ** 2)
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        return R * c
+
+    def create_location_albums(self, db: Session, threshold_meters: int = 100) -> dict[str, int]:
+        """Create auto-albums for photos grouped by GPS location.
+
+        Photos within threshold_meters are clustered together into location albums.
+        Returns: { "albums_created": N, "photos_organized": K }
+        """
+        from app.models.album import Album, AlbumPhoto
+        from app.models.photo import Photo
+
+        photos = (
+            db.query(Photo)
+            .filter(Photo.deleted == False)
+            .all()
+        )
+
+        if not photos:
+            return {"albums_created": 0, "photos_organized": 0}
+
+        gps_photos = []
+        for photo in photos:
+            lat, lon = self._parse_gps(photo.exif_data or {})
+            if lat is not None and lon is not None:
+                gps_photos.append((photo, lat, lon))
+
+        if not gps_photos:
+            return {"albums_created": 0, "photos_organized": 0}
+
+        # Cluster using union-find
+        parent: dict[int, int] = {i: i for i in range(len(gps_photos))}
+
+        def find(x: int) -> int:
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        def union(x: int, y: int) -> None:
+            px, py = find(x), find(y)
+            if px != py:
+                parent[px] = py
+
+        n = len(gps_photos)
+        for i in range(n):
+            for j in range(i + 1, n):
+                _, lat1, lon1 = gps_photos[i]
+                _, lat2, lon2 = gps_photos[j]
+                dist = self._haversine(lat1, lon1, lat2, lon2)
+                if dist <= threshold_meters:
+                    union(i, j)
+
+        # Group by cluster root
+        groups: dict[int, list] = {}
+        for i in range(n):
+            root = find(i)
+            groups.setdefault(root, []).append(gps_photos[i])
+
+        albums_created = 0
+        photos_organized = set()
+
+        for root, cluster in groups.items():
+            # Use centroid as album name
+            avg_lat = sum(p[1] for p in cluster) / len(cluster)
+            avg_lon = sum(p[2] for p in cluster) / len(cluster)
+            lat_dir = "N" if avg_lat >= 0 else "S"
+            lon_dir = "E" if avg_lon >= 0 else "W"
+            album_name = f"Location: {abs(avg_lat):.4f}\u00b0{lat_dir}, {abs(avg_lon):.4f}\u00b0{lon_dir}"
+
+            album = db.query(Album).filter(Album.name == album_name, Album.is_auto == True).first()
+            created = album is None
+            if created:
+                album = Album(name=album_name, is_auto=True, description=f"Auto-generated location album")
+                db.add(album)
+                db.flush()
+                albums_created += 1
+                logger.info(f"Created location auto-album: {album_name}")
+
+            if album and album.is_auto:
+                cluster_photos = [p[0] for p in cluster]
+                self._add_photos_to_album(db, album, cluster_photos)
+                for p in cluster_photos:
+                    photos_organized.add(p.id)
+
+        return {
+            "albums_created": albums_created,
+            "photos_organized": len(photos_organized),
+        }
+
+    def suggest_best_shots(self, db: Session) -> dict[str, int]:
+        """For each duplicate group, mark the best photo based on quality metrics.
+
+        Scoring: sharpness (50%) + brightness closeness to 0.5 (30%) + face count (20%)
+        Returns: { "groups_processed": N, "best_shots_marked": K }
+        """
+        from app.models.photo_metadata import PhotoMetadata
+
+        all_metadata = (
+            db.query(PhotoMetadata)
+            .filter(PhotoMetadata.is_duplicate == True)
+            .all()
+        )
+
+        if not all_metadata:
+            return {"groups_processed": 0, "best_shots_marked": 0}
+
+        # Group by duplicate_of (original_id)
+        groups: dict[int, list] = {}
+        for meta in all_metadata:
+            original_id = meta.duplicate_of if meta.duplicate_of else meta.photo_id
+            groups.setdefault(original_id, []).append(meta)
+
+        groups_processed = 0
+        best_shots_marked = 0
+
+        for original_id, members in groups.items():
+            if len(members) < 2:
+                continue
+            groups_processed += 1
+
+            # Reset all in group
+            for meta in members:
+                meta.is_best_shot = False
+
+            # Score each member
+            def score_photo(meta) -> float:
+                sharpness = meta.sharpness if meta.sharpness is not None else 0.0
+                brightness = meta.brightness if meta.sharpness is not None else 0.5
+                brightness_score = 1.0 - abs(brightness - 0.5) * 2  # 1.0 at 0.5, 0.0 at 0/1
+                face_count = 0  # TODO: integrate with face system when available
+                return sharpness * 0.5 + brightness_score * 0.3 + face_count * 0.2
+
+            best_meta = max(members, key=score_photo)
+            best_meta.is_best_shot = True
+            best_shots_marked += 1
+
+        return {
+            "groups_processed": groups_processed,
+            "best_shots_marked": best_shots_marked,
         }

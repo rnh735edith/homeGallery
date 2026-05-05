@@ -1,12 +1,16 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+﻿# dependencies
 /node_modules
 /.pnp
 .pnp.js
 
 # testing
 /coverage
+/playwright-report/
+/test-results/
+/blob-report/
+/playwright/.cache/
+/.playwright-mcp/
+/playwright-mcp/
 
 # next.js
 /.next/
@@ -14,6 +18,7 @@
 
 # production
 /build
+/frontend/dist/
 
 # misc
 .DS_Store
@@ -34,3 +39,28 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# data (runtime)
+/data/
+!/data/config.json.example
+
+# test data
+/test_photos/
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+.pytest_cache/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS thumbnails cache
+**/Thumbs.db

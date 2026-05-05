@@ -40,22 +40,30 @@ class TestOrganizationAgentIsProcessed:
 
 class TestOrganizationAgentProcessPhoto:
     def test_process_photo_calls_service_methods(self, agent):
-        """process_photo runs create_date_albums and detect_duplicates."""
+        """process_photo runs create_date_albums, create_location_albums, detect_duplicates, suggest_best_shots."""
         db = MagicMock()
         photo = MagicMock()
         photo.id = 1
 
         with patch.object(agent.service, "create_date_albums") as mock_albums, \
-             patch.object(agent.service, "detect_duplicates") as mock_dups:
+             patch.object(agent.service, "create_location_albums") as mock_location, \
+             patch.object(agent.service, "detect_duplicates") as mock_dups, \
+             patch.object(agent.service, "suggest_best_shots") as mock_best:
             mock_albums.return_value = {"daily_created": 1, "monthly_created": 0, "photos_organized": 5}
+            mock_location.return_value = {"albums_created": 1, "photos_organized": 3}
             mock_dups.return_value = {"photos_scanned": 10, "duplicate_groups": 1, "duplicates_marked": 2}
+            mock_best.return_value = {"groups_processed": 1, "best_shots_marked": 1}
 
             result = agent.process_photo(photo, db)
 
             mock_albums.assert_called_once_with(db)
+            mock_location.assert_called_once_with(db)
             mock_dups.assert_called_once()
+            mock_best.assert_called_once_with(db)
             assert "albums" in result
+            assert "location_albums" in result
             assert "duplicates" in result
+            assert "best_shots" in result
 
 
 class TestOrganizationAgentMarkProcessed:

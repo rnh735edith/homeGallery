@@ -11,7 +11,7 @@ class OrganizationAgent(AgentBase):
     """Agent that auto-creates albums by date and detects duplicate photos."""
 
     name: str = "organization"
-    description: str = "Organization agent: auto-create albums by date, detect duplicate photos"
+    description: str = "Organization agent: auto-create albums by date/location, detect duplicates, suggest best shots"
     default_interval: int = 15
 
     def __init__(self, settings):
@@ -25,12 +25,20 @@ class OrganizationAgent(AgentBase):
         albums_result = self.service.create_date_albums(db)
         logger.info(f"Date albums: {albums_result}")
 
+        location_result = self.service.create_location_albums(db)
+        logger.info(f"Location albums: {location_result}")
+
         duplicates_result = self.service.detect_duplicates(db)
         logger.info(f"Duplicate detection: {duplicates_result}")
 
+        best_shot_result = self.service.suggest_best_shots(db)
+        logger.info(f"Best shot suggestions: {best_shot_result}")
+
         return {
             "albums": albums_result,
+            "location_albums": location_result,
             "duplicates": duplicates_result,
+            "best_shots": best_shot_result,
         }
 
     def is_photo_processed(self, photo, db: Session) -> bool:

@@ -177,6 +177,28 @@ export const metadata = {
   get: (photoId) => api.get(`/photos/${photoId}/metadata`),
 };
 
+export const analysis = {
+  getAnalysis: (id) => api.get(`/photos/${id}/analysis`),
+  getEnhancementSuggestions: (id) =>
+    api.get(`/photos/${id}/enhancement/suggestions`),
+  applyEnhancement: (id, params = {}) =>
+    api.post(`/photos/${id}/enhancement/apply`, params),
+  getEnhancedImage: (id) =>
+    api.get(`/photos/${id}/enhanced`, { responseType: "blob" }),
+};
+
+export const apiKeys = {
+  list: () => api.get("/api-keys"),
+  get: (id) => api.get(`/api-keys/${id}`),
+  create: (data) => api.post("/api-keys", data),
+  update: (id, data) => api.put(`/api-keys/${id}`, data),
+  delete: (id) => api.delete(`/api-keys/${id}`),
+};
+
+export const contact = {
+  submitMessage: (data) => api.post("/contact", data),
+};
+
 const apiClient = api;
 apiClient.auth = auth;
 apiClient.photos = photos;
@@ -188,4 +210,5 @@ apiClient.setup = setup;
 apiClient.management = management;
 apiClient.agents = agents;
 apiClient.metadata = metadata;
+apiClient.apiKeys = apiKeys;
 export default apiClient;

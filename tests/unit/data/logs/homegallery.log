@@ -1,0 +1,106 @@
+2026-05-04 01:06:56 - httpx - INFO - [_client.py:1025] - HTTP Request: GET http://testserver/api/agents/status "HTTP/1.1 200 OK"
+2026-05-04 01:06:56 - httpx - INFO - [_client.py:1025] - HTTP Request: GET http://testserver/api/agents/metadata/status "HTTP/1.1 200 OK"
+2026-05-04 01:06:57 - httpx - INFO - [_client.py:1025] - HTTP Request: GET http://testserver/api/agents/nonexistent/status "HTTP/1.1 404 Not Found"
+2026-05-04 01:06:57 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/metadata/run "HTTP/1.1 200 OK"
+2026-05-04 01:06:57 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/nonexistent/run "HTTP/1.1 404 Not Found"
+2026-05-04 01:06:57 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/metadata/start "HTTP/1.1 200 OK"
+2026-05-04 01:06:57 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/nonexistent/start "HTTP/1.1 404 Not Found"
+2026-05-04 01:06:57 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/metadata/stop "HTTP/1.1 200 OK"
+2026-05-04 01:06:57 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/nonexistent/stop "HTTP/1.1 404 Not Found"
+2026-05-04 01:06:57 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/metadata/reset "HTTP/1.1 200 OK"
+2026-05-04 01:06:57 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/nonexistent/reset "HTTP/1.1 404 Not Found"
+2026-05-04 01:06:57 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:57 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:57 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:57 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:57 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:57 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:57 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:57 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:57 - passlib.handlers.bcrypt - WARNING - [bcrypt.py:622] - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "C:\Users\Ravi Hegde\AppData\Local\Programs\Python\Python314\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-05-04 01:06:58 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:59 - app.agents.services.metadata_service - WARNING - [metadata_service.py:66] - Failed to extract EXIF from /nonexistent/file.jpg: [Errno 2] No such file or directory: '/nonexistent/file.jpg'
+2026-05-04 01:06:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:06:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:08:23 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: test_agent
+2026-05-04 01:08:23 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: agent1
+2026-05-04 01:08:23 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: agent2
+2026-05-04 01:08:23 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: test
+2026-05-04 01:08:23 - app.agents.orchestrator - INFO - [orchestrator.py:39] - Started 1 agents
+2026-05-04 01:08:23 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: test
+2026-05-04 01:08:23 - app.agents.orchestrator - INFO - [orchestrator.py:51] - All agents stopped
+2026-05-04 01:08:23 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: metadata
+2026-05-04 01:08:23 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: analysis
+2026-05-04 01:10:09 - httpx - INFO - [_client.py:1025] - HTTP Request: GET http://testserver/api/agents/status "HTTP/1.1 200 OK"
+2026-05-04 01:10:09 - httpx - INFO - [_client.py:1025] - HTTP Request: GET http://testserver/api/agents/metadata/status "HTTP/1.1 200 OK"
+2026-05-04 01:10:09 - httpx - INFO - [_client.py:1025] - HTTP Request: GET http://testserver/api/agents/nonexistent/status "HTTP/1.1 404 Not Found"
+2026-05-04 01:10:09 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/metadata/run "HTTP/1.1 200 OK"
+2026-05-04 01:10:09 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/nonexistent/run "HTTP/1.1 404 Not Found"
+2026-05-04 01:10:09 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/metadata/start "HTTP/1.1 200 OK"
+2026-05-04 01:10:09 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/nonexistent/start "HTTP/1.1 404 Not Found"
+2026-05-04 01:10:09 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/metadata/stop "HTTP/1.1 200 OK"
+2026-05-04 01:10:09 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/nonexistent/stop "HTTP/1.1 404 Not Found"
+2026-05-04 01:10:10 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/metadata/reset "HTTP/1.1 200 OK"
+2026-05-04 01:10:10 - httpx - INFO - [_client.py:1025] - HTTP Request: POST http://testserver/api/agents/nonexistent/reset "HTTP/1.1 404 Not Found"
+2026-05-04 01:10:10 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:10 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:10 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:10 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:10 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:10 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:10 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:10 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:10 - passlib.handlers.bcrypt - WARNING - [bcrypt.py:622] - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "C:\Users\Ravi Hegde\AppData\Local\Programs\Python\Python314\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-05-04 01:10:11 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:14 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:14 - app.agents.services.metadata_service - WARNING - [metadata_service.py:66] - Failed to extract EXIF from /nonexistent/file.jpg: [Errno 2] No such file or directory: '/nonexistent/file.jpg'
+2026-05-04 01:10:14 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:14 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:14 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:14 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:14 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.services.metadata_service - INFO - [metadata_service.py:42] - onnxruntime not available, object detection disabled
+2026-05-04 01:10:59 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: test_agent
+2026-05-04 01:10:59 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: agent1
+2026-05-04 01:10:59 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: agent2
+2026-05-04 01:10:59 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: test
+2026-05-04 01:10:59 - app.agents.orchestrator - INFO - [orchestrator.py:39] - Started 1 agents
+2026-05-04 01:10:59 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: test
+2026-05-04 01:10:59 - app.agents.orchestrator - INFO - [orchestrator.py:51] - All agents stopped
+2026-05-04 01:10:59 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: metadata
+2026-05-04 01:10:59 - app.agents.orchestrator - INFO - [orchestrator.py:19] - Registered agent: analysis

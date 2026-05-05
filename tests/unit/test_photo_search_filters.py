@@ -70,6 +70,7 @@ def mock_user():
 
 class TestTagSearch:
     def test_search_by_tag_returns_matching_photos(self, db_session, mock_user):
+        """Tag search returns photos with matching metadata objects."""
         # Directly call the endpoint function
         result = list_photos(
             page=1,
@@ -77,6 +78,7 @@ class TestTagSearch:
             q=None,
             tag="beach",
             color=None,
+            min_quality=None,
             favorite=None,
             sort_by="uploaded_at",
             sort_order="desc",
@@ -88,12 +90,14 @@ class TestTagSearch:
         assert "beach.jpg" in filenames
 
     def test_search_by_tag_no_results(self, db_session, mock_user):
+        """Tag search returns empty when no matches."""
         result = list_photos(
             page=1,
             page_size=20,
             q=None,
             tag="nonexistent",
             color=None,
+            min_quality=None,
             favorite=None,
             sort_by="uploaded_at",
             sort_order="desc",
@@ -105,12 +109,14 @@ class TestTagSearch:
 
 class TestColorSearch:
     def test_search_by_color_returns_matching_photos(self, db_session, mock_user):
+        """Color search returns photos with matching color palette."""
         result = list_photos(
             page=1,
             page_size=20,
             q=None,
             tag=None,
             color="#0000FF",
+            min_quality=None,
             favorite=None,
             sort_by="uploaded_at",
             sort_order="desc",
@@ -122,12 +128,14 @@ class TestColorSearch:
         assert "beach.jpg" in filenames
 
     def test_search_by_color_no_results(self, db_session, mock_user):
+        """Color search returns empty when no matches."""
         result = list_photos(
             page=1,
             page_size=20,
             q=None,
             tag=None,
             color="#FF0000",
+            min_quality=None,
             favorite=None,
             sort_by="uploaded_at",
             sort_order="desc",
