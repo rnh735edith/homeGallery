@@ -64,8 +64,8 @@ def configure_setup(data: SetupRequest):
         config_path = config_loader.save(config)
 
         if data.notifications and data.notifications.bot_token and data.notifications.chat_id:
-            from app.database import SessionLocal
-            db = SessionLocal()
+            from app.database import SessionFactory
+            db = SessionFactory()
             telegram_config = TelegramConfig(
                 enabled=data.notifications.enabled,
                 bot_token_encrypted=encrypt_value(data.notifications.bot_token),

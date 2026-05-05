@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 
 from app.logging_config import setup_logging, get_logger
 from app.config import get_settings
-from app.database import init_db, SessionLocal
+from app.database import init_db, SessionFactory
 from app.api import api_router
 from app.workers.face_worker import FaceWorker
 from app.workers.thumbnail_worker import ThumbnailWorker
@@ -84,7 +84,7 @@ async def lifespan(app: FastAPI):
 
     notification_hub = NotificationHub()
     try:
-        db = SessionLocal()
+        db = SessionFactory()
         telegram_service = TelegramService.from_db(db)
         notification_hub.register("telegram", telegram_service)
         db.close()
