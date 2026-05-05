@@ -199,6 +199,12 @@ export const contact = {
   submitMessage: (data) => api.post("/contact", data),
 };
 
+export const notifications = {
+  getTelegram: () => api.get("/notifications/telegram"),
+  updateTelegram: (data) => api.put("/notifications/telegram", data),
+  testTelegram: () => api.post("/notifications/telegram/test"),
+};
+
 const apiClient = api;
 apiClient.auth = auth;
 apiClient.photos = photos;
@@ -211,4 +217,5 @@ apiClient.management = management;
 apiClient.agents = agents;
 apiClient.metadata = metadata;
 apiClient.apiKeys = apiKeys;
+apiClient.notifications = notifications;
 export default apiClient;

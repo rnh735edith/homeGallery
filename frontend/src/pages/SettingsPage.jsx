@@ -50,6 +50,9 @@ export default function SettingsPage() {
   const [contactMessages, setContactMessages] = useState([]);
   const [contactLoading, setContactLoading] = useState(false);
   const [networkInfo, setNetworkInfo] = useState(null);
+  const [telegramConfig, setTelegramConfig] = useState(null);
+  const [telegramTesting, setTelegramTesting] = useState(false);
+  const [telegramTestResult, setTelegramTestResult] = useState(null);
 
   const fetchAgents = useAgentStore((state) => state.fetchAgents);
   const agents = useAgentStore((state) => state.agents);
@@ -71,6 +74,9 @@ export default function SettingsPage() {
     }
     if (activeTab === "messages") {
       loadContactMessages();
+    }
+    if (activeTab === "notifications") {
+      loadTelegramConfig();
     }
   }, [activeTab]);
 
@@ -350,6 +356,43 @@ export default function SettingsPage() {
     }
   };
 
+  const loadTelegramConfig = async () => {
+    try {
+      const res = await api.notifications.getTelegram();
+      setTelegramConfig(res.data);
+    } catch (err) {
+      console.error("Failed to load Telegram config", err);
+    }
+  };
+
+  const saveTelegramConfig = async () => {
+    try {
+      const res = await api.notifications.updateTelegram(telegramConfig);
+      setTelegramConfig(res.data);
+      setMessage("Telegram settings saved");
+    } catch (err) {
+      setError(
+        err.response?.data?.detail || "Failed to save Telegram settings",
+      );
+    }
+  };
+
+  const testTelegramConnection = async () => {
+    setTelegramTesting(true);
+    setTelegramTestResult(null);
+    try {
+      const res = await api.notifications.testTelegram();
+      setTelegramTestResult(res.data);
+    } catch (err) {
+      setTelegramTestResult({
+        ok: false,
+        error: err.response?.data?.detail || "Test failed",
+      });
+    } finally {
+      setTelegramTesting(false);
+    }
+  };
+
   const handleMarkRead = async (id) => {
     try {
       await api.put(`/contact/messages/${id}/read`);
@@ -389,6 +432,7 @@ export default function SettingsPage() {
     { id: "backup", label: "Backup & Restore" },
     { id: "wipe", label: "Wipe Data" },
     { id: "agents", label: "Agents" },
+    { id: "notifications", label: "Notifications" },
     { id: "api-keys", label: "API Keys" },
     { id: "messages", label: "Messages" },
   ];
@@ -946,6 +990,125 @@ export default function SettingsPage() {
             </div>
           </SettingSection>
         </div>
+      )}
+
+      {activeTab === "notifications" && (
+        <SettingSection title="Telegram Notifications" icon="bell">
+          {telegramConfig ? (
+            <>
+              <div className="form-group toggle-group">
+                <label className="toggle-label">
+                  <input
+                    type="checkbox"
+                    checked={telegramConfig.enabled}
+                    onChange={(e) =>
+                      setTelegramConfig({
+                        ...telegramConfig,
+                        enabled: e.target.checked,
+                      })
+                    }
+                  />
+                  Enabled
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label>Bot Token</label>
+                <input
+                  type="password"
+                  value={telegramConfig.bot_token || ""}
+                  onChange={(e) =>
+                    setTelegramConfig({
+                      ...telegramConfig,
+                      bot_token: e.target.value,
+                    })
+                  }
+                  placeholder="Enter new token (leave blank to keep existing)"
+                />
+                {telegramConfig.bot_token_masked && (
+                  <small>Current: {telegramConfig.bot_token_masked}</small>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>Chat ID</label>
+                <input
+                  type="text"
+                  value={telegramConfig.chat_id || ""}
+                  onChange={(e) =>
+                    setTelegramConfig({
+                      ...telegramConfig,
+                      chat_id: e.target.value,
+                    })
+                  }
+                  placeholder="503968467"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Event Types</label>
+                <div className="checkbox-grid">
+                  {[
+                    "server_start",
+                    "server_restart",
+                    "error_critical",
+                    "security_login_failed",
+                    "processing_slow",
+                    "agent_duplicates_found",
+                  ].map((evt) => (
+                    <label key={evt} className="toggle-label">
+                      <input
+                        type="checkbox"
+                        checked={telegramConfig.event_types?.includes(evt)}
+                        onChange={(e) => {
+                          const events = e.target.checked
+                            ? [...(telegramConfig.event_types || []), evt]
+                            : (telegramConfig.event_types || []).filter(
+                                (x) => x !== evt,
+                              );
+                          setTelegramConfig({
+                            ...telegramConfig,
+                            event_types: events,
+                          });
+                        }}
+                      />
+                      {evt.replace(/_/g, " ")}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="form-actions">
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={saveTelegramConfig}
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save"}
+                </button>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={testTelegramConnection}
+                  disabled={telegramTesting}
+                >
+                  {telegramTesting ? "Testing..." : "Send Test Message"}
+                </button>
+              </div>
+
+              {telegramTestResult && (
+                <div
+                  className={`test-result ${telegramTestResult.ok ? "success" : "error"}`}
+                >
+                  {telegramTestResult.ok
+                    ? `✅ ${telegramTestResult.message}`
+                    : `❌ ${telegramTestResult.error}`}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="loading">Loading...</div>
+          )}
+        </SettingSection>
       )}
 
       {activeTab === "api-keys" && (

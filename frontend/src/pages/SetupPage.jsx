@@ -6,6 +6,7 @@ import StepAdmin from "../components/Setup/StepAdmin";
 import StepServer from "../components/Setup/StepServer";
 import StepDatabase from "../components/Setup/StepDatabase";
 import StepProcessing from "../components/Setup/StepProcessing";
+import StepNotifications from "../components/Setup/StepNotifications";
 import StepSummary from "../components/Setup/StepSummary";
 
 const STEPS = [
@@ -14,6 +15,7 @@ const STEPS = [
   { id: "server", label: "Server", component: StepServer },
   { id: "database", label: "Database", component: StepDatabase },
   { id: "processing", label: "Processing", component: StepProcessing },
+  { id: "notifications", label: "Notifications", component: StepNotifications },
   { id: "summary", label: "Review", component: StepSummary },
 ];
 
@@ -33,6 +35,7 @@ export default function SetupPage() {
       face_detection: true,
       thumbnail_sizes: { small: 200, medium: 800, large: 1920 },
     },
+    notifications: { enabled: false, bot_token: "", chat_id: "" },
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
