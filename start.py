@@ -102,8 +102,8 @@ def check_nginx_installed():
     except FileNotFoundError:
         return False
     except subprocess.CalledProcessError:
+        # nginx is installed but returned non-zero (e.g., -v writes to stderr)
         return True
-    return False
 
 
 def generate_nginx_config(app_port=8080, mcp_port=8081):
@@ -275,7 +275,6 @@ def main():
         return
 
     # Default: just start server
-    needs_setup = not check_config()
 
     if needs_setup:
         print("First-time setup required.")

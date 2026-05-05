@@ -10,6 +10,13 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/settings", tags=["settings"])
 
 
+def _validate_safe_path(path: str):
+    """Validate that a path does not contain traversal sequences."""
+    normalized = os.path.normpath(path)
+    if normalized.startswith("..") or os.path.isabs(normalized) and ".." in normalized.split(os.sep):
+        raise HTTPException(status_code=400, detail="Invalid path: directory traversal not allowed")
+
+
 class ServerSettings(BaseModel):
     host: Optional[str] = None
     port: Optional[int] = None
@@ -78,12 +85,15 @@ def update_settings(data: SettingsUpdate):
     if data.storage:
         storage = config.setdefault("storage", {})
         if data.storage.photo_dir is not None:
+            _validate_safe_path(data.storage.photo_dir)
             storage["photo_dir"] = data.storage.photo_dir
             os.makedirs(data.storage.photo_dir, exist_ok=True)
         if data.storage.thumbnail_dir is not None:
+            _validate_safe_path(data.storage.thumbnail_dir)
             storage["thumbnail_dir"] = data.storage.thumbnail_dir
             os.makedirs(data.storage.thumbnail_dir, exist_ok=True)
         if data.storage.face_encoding_dir is not None:
+            _validate_safe_path(data.storage.face_encoding_dir)
             storage["face_encoding_dir"] = data.storage.face_encoding_dir
             os.makedirs(data.storage.face_encoding_dir, exist_ok=True)
 

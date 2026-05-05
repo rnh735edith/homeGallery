@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "setup_completed_at": "2026-04-30T12:00:00Z",
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8080
+  },
+  "database": {
+    "type": "sqlite",
+    "url": "sqlite:///./data/gallery.db"
+  },
+  "storage": {
+    "photo_dir": "./data/photos",
+    "thumbnail_dir": "./data/thumbnails",
+    "face_encoding_dir": "./data/face_encodings"
+  },
+  "admin": {
+    "username": "admin"
+  },
+  "processing": {
+    "thumbnail_sizes": { "small": 200, "medium": 800, "large": 1920 },
+    "auto_thumbnails": true,
+    "face_detection": true,
+    "face_processing_max_memory_mb": 512,
+    "max_concurrent_tasks": 2
+  },
+  "security": {
+    "jwt_secret": "auto-generated-on-setup",
+    "jwt_expire_minutes": 1440
+  }
+}

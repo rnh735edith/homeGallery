@@ -24,6 +24,28 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/management", tags=["management"])
 
 
+def _get_allowed_roots(storage: dict) -> list[str]:
+    """Get list of allowed directory roots from storage config."""
+    roots = []
+    for key in ["photo_dir", "thumbnail_dir", "face_encoding_dir"]:
+        if storage.get(key):
+            roots.append(os.path.realpath(storage[key]))
+    roots.append(os.path.realpath(os.path.join(os.getcwd(), "data")))
+    roots.append(os.path.realpath(os.getcwd()))
+    return roots
+
+
+def _validate_path_in_roots(path: str, allowed_roots: list[str]) -> str:
+    """Validate and resolve a path, ensuring it's within allowed roots.
+
+    Raises HTTPException if path is outside allowed directories.
+    """
+    real_path = os.path.realpath(path)
+    if not any(real_path.startswith(root + os.sep) or real_path == root for root in allowed_roots):
+        raise HTTPException(status_code=403, detail="Access denied: path outside allowed directories")
+    return real_path
+
+
 @router.get("/status")
 def get_management_status(db: Session = Depends(get_db), current_user: User = Depends(get_current_admin_user)):
     """Get system management status"""
@@ -357,18 +379,8 @@ def browse_folders(
     config = config_loader.load() or {}
     storage = config.get("storage", {})
 
-    allowed_roots = set()
-    for key in ["photo_dir", "thumbnail_dir", "face_encoding_dir"]:
-        if storage.get(key):
-            allowed_roots.add(os.path.realpath(storage[key]))
-    allowed_roots.add(os.path.realpath(os.path.join(os.getcwd(), "data")))
-    allowed_roots.add(os.path.realpath(os.getcwd()))
-
-    real_path = os.path.realpath(path)
-    is_allowed = any(real_path.startswith(root) for root in allowed_roots)
-
-    if not is_allowed:
-        raise HTTPException(status_code=403, detail="Access denied: path outside allowed directories")
+    allowed_roots = _get_allowed_roots(storage)
+    real_path = _validate_path_in_roots(path, allowed_roots)
 
     if not os.path.exists(real_path):
         raise HTTPException(status_code=404, detail="Path does not exist")
@@ -408,14 +420,9 @@ def create_folder(
     """Create a new directory"""
     config = config_loader.load() or {}
     storage = config.get("storage", {})
-    allowed_roots = [os.path.realpath(storage.get(k, "")) for k in ["photo_dir", "thumbnail_dir", "face_encoding_dir"]]
-    allowed_roots = [r for r in allowed_roots if r]
+    allowed_roots = _get_allowed_roots(storage)
 
-    real_path = os.path.realpath(path)
-    is_allowed = any(real_path.startswith(root) for root in allowed_roots)
-
-    if not is_allowed:
-        raise HTTPException(status_code=403, detail="Access denied: path outside allowed directories")
+    real_path = _validate_path_in_roots(path, allowed_roots)
 
     try:
         os.makedirs(real_path, exist_ok=True)
@@ -437,14 +444,9 @@ def delete_folder(
 
     config = config_loader.load() or {}
     storage = config.get("storage", {})
-    allowed_roots = [os.path.realpath(storage.get(k, "")) for k in ["photo_dir", "thumbnail_dir", "face_encoding_dir"]]
-    allowed_roots = [r for r in allowed_roots if r]
+    allowed_roots = _get_allowed_roots(storage)
 
-    real_path = os.path.realpath(path)
-    is_allowed = any(real_path.startswith(root) for root in allowed_roots)
-
-    if not is_allowed:
-        raise HTTPException(status_code=403, detail="Access denied: path outside allowed directories")
+    real_path = _validate_path_in_roots(path, allowed_roots)
 
     try:
         shutil.rmtree(real_path)

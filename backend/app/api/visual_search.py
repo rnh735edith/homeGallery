@@ -5,7 +5,6 @@ Provides text-to-image search and image similarity search.
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
 
 from app.database import get_db
 from app.models.photo import Photo

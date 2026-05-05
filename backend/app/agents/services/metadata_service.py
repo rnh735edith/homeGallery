@@ -216,12 +216,12 @@ class MetadataService:
                     hour = int(dt_str.split(" ")[1].split(":")[0])
                     if hour >= 20 or hour < 6:
                         clues.append("night")
-                    elif 6 <= hour < 10:
+                    elif hour < 10:
                         clues.append("morning")
-                    elif 17 <= hour < 20:
-                        clues.append("evening")
-                    else:
+                    elif 10 <= hour < 17:
                         clues.append("daytime")
+                    else:
+                        clues.append("evening")
                 except (ValueError, IndexError):
                     pass
 

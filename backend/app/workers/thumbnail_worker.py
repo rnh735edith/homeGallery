@@ -1,8 +1,6 @@
 import os
-import logging
 import gc
 from apscheduler.schedulers.background import BackgroundScheduler
-from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.database import SessionFactory
