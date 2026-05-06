@@ -47,7 +47,7 @@ def start_server(port=8080, host="0.0.0.0"):
             reload=False,
         )
     except ImportError:
-        os.system(f"{sys.executable} -m uvicorn backend.app.main:app --host {host} --port {port}")
+        subprocess.run([sys.executable, "-m", "uvicorn", "backend.app.main:app", "--host", host, "--port", str(port)], check=True)
 
 
 def start_playwright_mcp(port=8081):

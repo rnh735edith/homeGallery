@@ -75,7 +75,7 @@ class AgentBase(ABC):
         db = SessionFactory()
         try:
             photos = self._get_pending_photos(db)
-            max_tasks = self.settings.processing.max_concurrent_tasks
+            max_tasks = self.settings.MAX_CONCURRENT_TASKS
             for photo in photos[:max_tasks]:
                 try:
                     result = self.process_photo(photo, db)

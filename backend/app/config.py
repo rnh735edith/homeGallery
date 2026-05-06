@@ -62,6 +62,15 @@ def get_settings() -> Settings:
                     settings.FACE_ENCODING_DIR = config.get("storage", {}).get("face_encoding_dir", settings.FACE_ENCODING_DIR)
                 if os.environ.get("DATA_DIR") is None:
                     settings.DATA_DIR = config.get("storage", {}).get("photo_dir", settings.DATA_DIR).rsplit("/", 1)[0]
+                # Handle processing configuration
+                if hasattr(settings, 'MAX_CONCURRENT_TASKS'):
+                    processing_config = config.get("processing", {})
+                    if "max_concurrent_tasks" in processing_config:
+                        settings.MAX_CONCURRENT_TASKS = processing_config["max_concurrent_tasks"]
+                    if "face_processing_max_memory_mb" in processing_config:
+                        settings.FACE_PROCESSING_MAX_MEMORY_MB = processing_config["face_processing_max_memory_mb"]
+                    if "thumbnail_sizes" in processing_config:
+                        settings.THUMBNAIL_SIZES = processing_config["thumbnail_sizes"]
     except ImportError:
         # config_loader not available - use defaults
         pass
